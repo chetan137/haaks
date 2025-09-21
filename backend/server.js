@@ -11,6 +11,9 @@ const { authenticateToken } = require('./middleware/authMiddleware');
 const authController = require('./controllers/authController');
 const chatbotController = require('./controllers/chatbotController');
 
+// Import routes
+const modernizeRoutes = require('./routes/modernizeRoutes');
+
 const app = express();
 
 // Connect to MongoDB
@@ -37,6 +40,9 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files
+app.use(express.static('public'));
 
 // Session middleware
 app.use(session({
@@ -70,6 +76,9 @@ app.post('/api/chatbot/chat', (req, res, next) => {
 });
 
 app.get('/api/chatbot/history/:sessionId', authenticateToken, chatbotController.getConversationHistory);
+
+// Modernization routes
+app.use('/api/v1', modernizeRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

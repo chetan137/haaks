@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AS/400 Legacy Modernization Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        .glass-card {
+            background: rgba(26, 26, 26, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 140, 0, 0.2);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #FF8C00 0%, #FFD700 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF8C00 0%, #FFD700 100%);
+            box-shadow: 0 8px 24px rgba(255, 140, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(255, 140, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid rgba(255, 140, 0, 0.6);
+            color: #CCCCCC;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 140, 0, 0.1);
+            border-color: rgba(255, 140, 0, 0.8);
+        }
+
+        .tab-active {
+            background: linear-gradient(135deg, #FF8C00 0%, #FFD700 100%);
+            color: #111111;
+        }
+
+        .tab-inactive {
+            background: transparent;
+            color: #CCCCCC;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error-message {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Hidden file inputs -->
+    <input type="file" id="copybook-input" accept=".cpy" hidden>
+    <input type="file" id="data-input" accept=".dat" hidden>
+
+    <!-- Background gradient -->
+    <div class="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
+    <div class="fixed inset-0 bg-gradient-to-r from-orange-500/5 via-transparent to-yellow-500/5"></div>
+
+    <!-- Main content -->
+    <div class="relative z-10 min-h-screen">
+        <!-- Header -->
+        <header class="py-8 px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-5xl font-bold mb-4">
+                    <span class="gradient-text">AS/400</span>
+                    <span class="text-white">Legacy Modernization</span>
+                </h1>
+                <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                    Transform your COBOL legacy systems into modern web applications with AI-powered analysis
+                </p>
+            </div>
+        </header>
+
+        <!-- Upload Section -->
+        <section class="py-12 px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="glass-card rounded-2xl p-8">
+                    <h2 class="text-3xl font-bold text-center mb-8">
+                        🚀 <span class="gradient-text">Upload Your Legacy Files</span>
+                    </h2>
+
+                    <div class="grid md:grid-cols-2 gap-6 mb-8">
+                        <!-- Copybook File -->
+                        <div class="glass-card rounded-xl p-6">
+                            <div class="text-center">
+                                <div class="text-4xl mb-4">📋</div>
+                                <h3 class="text-xl font-semibold mb-2">COBOL Copybook</h3>
+                                <p class="text-gray-400 mb-4">Upload your .cpy file containing the data structure definitions</p>
+                                <button id="copybook-btn" class="btn-secondary px-6 py-3 rounded-lg font-medium">
+                                    Select Copybook (.cpy)
+                                </button>
+                                <div id="copybook-status" class="mt-2 text-sm text-gray-400"></div>
+                            </div>
+                        </div>
+
+                        <!-- Data File -->
+                        <div class="glass-card rounded-xl p-6">
+                            <div class="text-center">
+                                <div class="text-4xl mb-4">💾</div>
+                                <h3 class="text-xl font-semibold mb-2">Legacy Data</h3>
+                                <p class="text-gray-400 mb-4">Upload your .dat file containing the actual data records</p>
+                                <button id="data-btn" class="btn-secondary px-6 py-3 rounded-lg font-medium">
+                                    Select Data (.dat)
+                                </button>
+                                <div id="data-status" class="mt-2 text-sm text-gray-400"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="text-center">
+                        <button id="modernize-btn" class="btn-primary px-12 py-4 rounded-xl text-xl font-bold text-black">
+                            🔥 Ignite Modernization
+                        </button>
+
+                        <!-- Loading Spinner -->
+                        <div id="loading-spinner" class="hidden mt-8">
+                            <div class="flex items-center justify-center">
+                                <div class="spinner w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"></div>
+                                <span class="ml-3 text-lg">Analyzing and modernizing your legacy files...</span>
+                            </div>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div id="error-message" class="hidden mt-4 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results-section" class="hidden py-12 px-4">
+            <div class="max-w-6xl mx-auto">
+                <div class="glass-card rounded-2xl p-8">
+                    <h2 class="text-3xl font-bold text-center mb-8">
+                        ✨ <span class="gradient-text">Modernization Results</span>
+                    </h2>
+
+                    <!-- Tab Navigation -->
+                    <div class="flex flex-wrap justify-center gap-4 mb-8">
+                        <button class="tab-btn tab-active px-6 py-3 rounded-lg font-medium" data-tab="db-schema">
+                            🗄️ Database Schema
+                        </button>
+                        <button class="tab-btn tab-inactive px-6 py-3 rounded-lg font-medium" data-tab="rest-api">
+                            🔗 REST API
+                        </button>
+                        <button class="tab-btn tab-inactive px-6 py-3 rounded-lg font-medium" data-tab="json-data">
+                            📊 JSON Data
+                        </button>
+                        <button class="tab-btn tab-inactive px-6 py-3 rounded-lg font-medium" data-tab="microservices">
+                            🏗️ Microservices
+                        </button>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Database Schema Tab -->
+                        <div id="db-schema-content" class="tab-panel">
+                            <h3 class="text-xl font-semibold mb-4">PostgreSQL Database Schema</h3>
+                            <div class="glass-card rounded-lg p-4 bg-gray-800">
+                                <pre><code class="language-sql" id="db-schema-code">-- Database schema will appear here after processing</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- REST API Tab -->
+                        <div id="rest-api-content" class="tab-panel hidden">
+                            <h3 class="text-xl font-semibold mb-4">Node.js Express REST API</h3>
+                            <div class="glass-card rounded-lg p-4 bg-gray-800">
+                                <pre><code class="language-javascript" id="rest-api-code">// REST API code will appear here after processing</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- JSON Data Tab -->
+                        <div id="json-data-content" class="tab-panel hidden">
+                            <h3 class="text-xl font-semibold mb-4">Converted JSON Data</h3>
+                            <div class="glass-card rounded-lg p-4 bg-gray-800">
+                                <pre><code class="language-json" id="json-data-code">// JSON data will appear here after processing</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Microservices Tab -->
+                        <div id="microservices-content" class="tab-panel hidden">
+                            <h3 class="text-xl font-semibold mb-4">Microservices Architecture Suggestions</h3>
+                            <div class="glass-card rounded-lg p-4 bg-gray-800">
+                                <pre><code class="language-markdown" id="microservices-code"># Microservices suggestions will appear here after processing</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Download Section -->
+                    <div class="mt-8 text-center">
+                        <button id="download-btn" class="btn-secondary px-8 py-3 rounded-lg font-medium">
+                            📥 Download All Assets
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // State variables
+            let copybookFile = null;
+            let datafileFile = null;
+            let currentResults = null;
+
+            // Get DOM elements
+            const copybookBtn = document.getElementById('copybook-btn');
+            const copybookInput = document.getElementById('copybook-input');
+            const copybookStatus = document.getElementById('copybook-status');
+
+            const dataBtn = document.getElementById('data-btn');
+            const dataInput = document.getElementById('data-input');
+            const dataStatus = document.getElementById('data-status');
+
+            const modernizeBtn = document.getElementById('modernize-btn');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const errorMessage = document.getElementById('error-message');
+            const resultsSection = document.getElementById('results-section');
+
+            // Tab elements
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+
+            // File selection handlers
+            copybookBtn.addEventListener('click', () => {
+                copybookInput.click();
+            });
+
+            dataBtn.addEventListener('click', () => {
+                dataInput.click();
+            });
+
+            copybookInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    copybookFile = file;
+                    copybookBtn.textContent = `✅ ${file.name}`;
+                    copybookBtn.classList.remove('btn-secondary');
+                    copybookBtn.classList.add('btn-primary', 'text-black');
+                    copybookStatus.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                    copybookStatus.classList.add('text-green-400');
+                    checkFilesReady();
+                }
+            });
+
+            dataInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    datafileFile = file;
+                    dataBtn.textContent = `✅ ${file.name}`;
+                    dataBtn.classList.remove('btn-secondary');
+                    dataBtn.classList.add('btn-primary', 'text-black');
+                    dataStatus.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                    dataStatus.classList.add('text-green-400');
+                    checkFilesReady();
+                }
+            });
+
+            function checkFilesReady() {
+                if (copybookFile && datafileFile) {
+                    modernizeBtn.classList.add('animate-pulse');
+                    modernizeBtn.innerHTML = '🚀 Ready to Modernize!';
+                }
+            }
+
+            // Tab switching
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetTab = btn.dataset.tab;
+
+                    // Update tab buttons
+                    tabBtns.forEach(b => {
+                        b.classList.remove('tab-active');
+                        b.classList.add('tab-inactive');
+                    });
+                    btn.classList.add('tab-active');
+                    btn.classList.remove('tab-inactive');
+
+                    // Update tab panels
+                    tabPanels.forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+                    document.getElementById(`${targetTab}-content`).classList.remove('hidden');
+                });
+            });
+
+            // Main modernization handler
+            modernizeBtn.addEventListener('click', async () => {
+                // Validate files
+                if (!copybookFile || !datafileFile) {
+                    showError('Please select both a copybook (.cpy) and data (.dat) file before proceeding.');
+                    return;
+                }
+
+                // Validate file extensions
+                if (!copybookFile.name.toLowerCase().endsWith('.cpy')) {
+                    showError('Copybook file must have a .cpy extension.');
+                    return;
+                }
+
+                if (!datafileFile.name.toLowerCase().endsWith('.dat')) {
+                    showError('Data file must have a .dat extension.');
+                    return;
+                }
+
+                // Show loading state
+                modernizeBtn.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
+                hideError();
+
+                try {
+                    // Prepare form data
+                    const formData = new FormData();
+                    formData.append('copybook', copybookFile);
+                    formData.append('datafile', datafileFile);
+
+                    // Get auth token (use demo token for prototype)
+                    const authToken = localStorage.getItem('authToken') || 'HACKATHON_DEMO_TOKEN';
+
+                    // Make API request
+                    const response = await fetch('/api/v1/modernize', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (!result.success) {
+                        throw new Error(result.error || 'Modernization failed');
+                    }
+
+                    // Store results
+                    currentResults = result;
+
+                    // Populate results
+                    populateResults(result.modernizationAssets);
+
+                    // Show results section with animation
+                    resultsSection.classList.remove('hidden');
+                    resultsSection.classList.add('fade-in');
+
+                    // Scroll to results
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+
+                } catch (error) {
+                    console.error('Modernization error:', error);
+                    showError(`Modernization failed: ${error.message}`);
+                    modernizeBtn.classList.remove('hidden');
+                } finally {
+                    loadingSpinner.classList.add('hidden');
+                }
+            });
+
+            function populateResults(assets) {
+                // Populate database schema
+                const dbSchemaCode = document.getElementById('db-schema-code');
+                dbSchemaCode.textContent = assets.dbSchema || 'No database schema generated';
+
+                // Populate REST API
+                const restApiCode = document.getElementById('rest-api-code');
+                restApiCode.textContent = assets.restApi || 'No REST API code generated';
+
+                // Populate JSON data
+                const jsonDataCode = document.getElementById('json-data-code');
+                if (Array.isArray(assets.jsonData)) {
+                    jsonDataCode.textContent = JSON.stringify(assets.jsonData, null, 2);
+                } else {
+                    jsonDataCode.textContent = assets.jsonData || 'No JSON data generated';
+                }
+
+                // Populate microservices
+                const microservicesCode = document.getElementById('microservices-code');
+                if (Array.isArray(assets.microservices)) {
+                    microservicesCode.textContent = assets.microservices.join('\n\n');
+                } else {
+                    microservicesCode.textContent = assets.microservices || 'No microservices suggestions generated';
+                }
+
+                // Apply syntax highlighting
+                Prism.highlightAll();
+            }
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('hidden');
+                errorMessage.classList.add('error-message');
+
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    errorMessage.classList.remove('error-message');
+                }, 500);
+            }
+
+            function hideError() {
+                errorMessage.classList.add('hidden');
+            }
+
+            // Download functionality
+            document.getElementById('download-btn').addEventListener('click', () => {
+                if (!currentResults) {
+                    showError('No results to download. Please run modernization first.');
+                    return;
+                }
+
+                const assets = currentResults.modernizationAssets;
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+
+                // Create download content
+                const content = `# AS/400 Modernization Results
+Generated on: ${new Date().toLocaleString()}
+Files: ${currentResults.files.copybook}, ${currentResults.files.datafile}
+
+## Database Schema
+\`\`\`sql
+${assets.dbSchema}
+\`\`\`
+
+## REST API
+\`\`\`javascript
+${assets.restApi}
+\`\`\`
+
+## JSON Data
+\`\`\`json
+${typeof assets.jsonData === 'string' ? assets.jsonData : JSON.stringify(assets.jsonData, null, 2)}
+\`\`\`
+
+## Microservices Suggestions
+${Array.isArray(assets.microservices) ? assets.microservices.join('\n\n') : assets.microservices}
+`;
+
+                // Create and trigger download
+                const blob = new Blob([content], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `modernization-results-${timestamp}.md`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            // Initialize
+            console.log('AS/400 Modernization Assistant initialized');
+        });
+    </script>
+</body>
+</html>
