@@ -1,0 +1,111 @@
+{
+  "common": {
+    "appName": "Aarogya Sahayak",
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "language": "Preferred Language",
+    "createAccount": "Create account",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "signinHere": "Sign in here",
+    "signupHere": "Sign up here",
+    "welcomeBack": "Welcome back",
+    "joinToday": "Join Aarogya Sahayak today",
+    "registrationSuccess": "Registration Successful!",
+    "checkEmailVerification": "Please check your email for a verification link to complete your account setup.",
+    "goToLogin": "Go to Login",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "orContinueWith": "Or continue with",
+    "signInWithGoogle": "Sign in with Google"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help"
+  },
+  "home": {
+    "hero": {
+      "title1": "Your Health",
+      "title2": "Companion",
+      "subtitle": "Aarogya Sahayak is your comprehensive health management platform. Track your health records, schedule appointments, and get personalized healthcare insights all in one place.",
+      "getStarted": "Get started",
+      "healthWellness": "Health & Wellness",
+      "journeyStarts": "Your journey to better health starts here"
+    },
+    "features": {
+      "title": "Features",
+      "subtitle": "Everything you need for better health",
+      "description": "Comprehensive health management tools designed to help you take control of your wellbeing.",
+      "healthRecords": {
+        "title": "Health Records",
+        "description": "Securely store and manage all your health records in one place."
+      },
+      "appointments": {
+        "title": "Appointments",
+        "description": "Schedule and manage appointments with healthcare providers."
+      },
+      "consultations": {
+        "title": "Consultations",
+        "description": "Connect with healthcare professionals for online consultations."
+      }
+    },
+    "footer": {
+      "tagline": "Your trusted health companion"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "title": "Dashboard",
+    "subtitle": "Welcome to your Aarogya Sahayak dashboard. This is a protected area that requires authentication.",
+    "profile": {
+      "title": "Your Profile",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "accountStatus": "Account Status",
+      "verified": "Verified",
+      "pendingVerification": "Pending Verification"
+    },
+    "stats": {
+      "healthRecords": "Health Records",
+      "appointments": "Appointments",
+      "consultations": "Consultations"
+    }
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Email is invalid",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "passwordsNotMatch": "Passwords do not match",
+    "nameMinLength": "Name must be at least 2 characters",
+    "unexpectedError": "An unexpected error occurred"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "confirmPasswordRequired": "Please confirm your password"
+  }
+}

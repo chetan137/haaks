@@ -1,0 +1,319 @@
+@import "tailwindcss";
+
+/* Global Styles for Professional Theme */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.5;
+  overflow-x: hidden;
+  font-size: 14px;
+}
+
+/* Animation utilities */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 140, 0, 0.6);
+  }
+}
+
+/* Professional Button Styles */
+.btn-primary {
+  background: var(--gradient-primary);
+  border: none;
+  color: var(--text-dark);
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--accent-start);
+  color: var(--accent-start);
+  padding: 9px 19px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.btn-secondary:hover {
+  background: var(--accent-start);
+  color: var(--text-dark);
+}
+
+/* Professional Card Styles */
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--neutral-border);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-elevated {
+  background: var(--bg-secondary);
+  border: 1px solid var(--neutral-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}
+
+:root {
+  /* Dynamic Black & Fiery Orange-Gold Theme */
+  /* Primary - Near Black */
+  --primary: #111111;
+  --primary-hover: #1a1a1a;
+  --primary-light: #2a2a2a;
+
+  /* Secondary - Soft Grey */
+  --secondary: #CCCCCC;
+  --secondary-hover: #b8b8b8;
+  --secondary-light: #e0e0e0;
+
+  /* Accent - Fiery Orange to Gold Gradient */
+  --accent-start: #FF8C00;
+  --accent-end: #FFD700;
+  --accent-hover: #ff7700;
+
+  /* Gradient Backgrounds */
+  --gradient-primary: linear-gradient(135deg, #FF8C00 0%, #FFD700 100%);
+  --gradient-secondary: linear-gradient(135deg, #111111 0%, #FF8C00 50%, #FFD700 100%);
+  --gradient-tertiary: linear-gradient(45deg, #FF8C00 0%, #FFD700 25%, #FF8C00 50%, #FFD700 75%, #FF8C00 100%);
+  --gradient-subtle: linear-gradient(135deg, rgba(255, 140, 0, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%);
+  --gradient-intense: linear-gradient(135deg, rgba(255, 140, 0, 0.8) 0%, rgba(255, 215, 0, 0.8) 100%);
+
+  /* Neutral Colors */
+  --neutral-dark: #000000;
+  --neutral-light: #f5f5f5;
+  --neutral-medium: #666666;
+  --neutral-border: #333333;
+
+  /* Status Colors */
+  --success: #00ff88;
+  --warning: #ff9500;
+  --error: #ff3030;
+  --info: var(--accent-start);
+
+  /* Text Colors */
+  --text-primary: #CCCCCC;
+  --text-secondary: #999999;
+  --text-light: #ffffff;
+  --text-dark: #111111;
+  --text-accent: var(--accent-start);
+  --text-gold: #FFD700;
+
+  /* Background Colors */
+  --bg-primary: #111111;
+  --bg-secondary: #1a1a1a;
+  --bg-dark: #000000;
+  --bg-light: #CCCCCC;
+  --bg-card: rgba(204, 204, 204, 0.05);
+  --bg-gradient: var(--gradient-primary);
+
+  /* Glass morphism effects with orange tint */
+  --glass-bg: rgba(255, 140, 0, 0.1);
+  --glass-border: rgba(255, 140, 0, 0.3);
+  --glass-shadow: rgba(0, 0, 0, 0.5);
+
+  /* Dynamic glow effects */
+  --glow-orange: 0 0 20px rgba(255, 140, 0, 0.5);
+  --glow-gold: 0 0 20px rgba(255, 215, 0, 0.5);
+  --glow-intense: 0 0 30px rgba(255, 140, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.4);
+}
+
+/* Responsive Design Utilities */
+@media (max-width: 768px) {
+  .hero-glass-card {
+    padding: 2rem 1.5rem !important;
+    border-radius: 16px !important;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 8vw, 3rem) !important;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1.2rem, 6vw, 2rem) !important;
+  }
+
+  .hero-description {
+    font-size: 1rem !important;
+  }
+
+  .feature-card {
+    min-width: 280px !important;
+    padding: 1.5rem !important;
+  }
+
+  .value-card {
+    min-width: 250px !important;
+    padding: 1.5rem !important;
+  }
+
+  .section-padding {
+    padding: 3rem 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-glass-card {
+    padding: 1.5rem 1rem !important;
+    margin: 0 1rem !important;
+  }
+
+  .cta-buttons {
+    flex-direction: column !important;
+    gap: 1rem !important;
+    width: 100% !important;
+  }
+
+  .cta-buttons button {
+    width: 100% !important;
+    padding: 14px 20px !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.5rem !important;
+  }
+
+  .testimonial-card {
+    min-width: 300px !important;
+    padding: 2rem !important;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+    text-align: center !important;
+  }
+
+  .footer-bottom {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 1rem !important;
+  }
+}
+
+/* Enhanced Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Scroll-triggered animations */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.8s ease;
+}
+
+.animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}

@@ -1,0 +1,461 @@
+{
+  "common": {
+    "appName": "Aarogya Sahayak",
+    "loading": "Loading...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "language": "Preferred Language",
+    "createAccount": "Create account",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "signinHere": "Sign in here",
+    "signupHere": "Sign up here",
+    "welcomeBack": "Welcome back",
+    "joinToday": "Join Aarogya Sahayak today",
+    "registrationSuccess": "Registration Successful!",
+    "checkEmailVerification": "Please check your email for a verification link to complete your account setup.",
+    "goToLogin": "Go to Login",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "orContinueWith": "Or continue with",
+    "signInWithGoogle": "Sign in with Google"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help"
+  },
+  "home": {
+    "hero": {
+      "title1": "Your Health",
+      "title2": "Companion",
+      "subtitle": "Aarogya Sahayak is your comprehensive health management platform. Track your health records, schedule appointments, and get personalized healthcare insights all in one place.",
+      "getStarted": "Get started",
+      "healthWellness": "Health & Wellness",
+      "journeyStarts": "Your journey to better health starts here"
+    },
+    "features": {
+      "title": "Features",
+      "subtitle": "Everything you need for better health",
+      "description": "Comprehensive health management tools designed to help you take control of your wellbeing.",
+      "healthRecords": {
+        "title": "Health Records",
+        "description": "Securely store and manage all your health records in one place."
+      },
+      "appointments": {
+        "title": "Appointments",
+        "description": "Schedule and manage appointments with healthcare providers."
+      },
+      "consultations": {
+        "title": "Consultations",
+        "description": "Connect with healthcare professionals for online consultations."
+      }
+    },
+    "footer": {
+      "tagline": "Your trusted health companion"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "title": "Dashboard",
+    "subtitle": "Welcome to your Aarogya Sahayak dashboard. This is a protected area that requires authentication.",
+    "profile": {
+      "title": "Your Profile",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "accountStatus": "Account Status",
+      "verified": "Verified",
+      "pendingVerification": "Pending Verification"
+    },
+    "stats": {
+      "healthRecords": "Health Records",
+      "appointments": "Appointments",
+      "consultations": "Consultations"
+    },
+    "vitals": {
+      "title": "Health Vitals Overview",
+      "bloodPressure": "Blood Pressure",
+      "heartRate": "Heart Rate",
+      "bloodSugar": "Blood Sugar",
+      "weight": "Weight",
+      "records": "Records",
+      "bpm": "BPM",
+      "mgdl": "mg/dL",
+      "kg": "kg",
+      "lastUpdated": "Last Updated"
+    },
+    "charts": {
+      "bloodPressureLast7Days": "Blood Pressure (Last 7 Days)",
+      "weightLast30Days": "Weight Trends (Last 30 Days)",
+      "bloodSugarLast7Days": "Blood Sugar Levels (Last 7 Days)",
+      "heartRateTemperatureLast7Days": "Heart Rate & Temperature (Last 7 Days)",
+      "noDataAvailable": "No data available",
+      "fasting": "Fasting",
+      "postMeal": "Post Meal",
+      "random": "Random",
+      "systolic": "Systolic",
+      "diastolic": "Diastolic",
+      "heartRateBPM": "Heart Rate (BPM)",
+      "temperatureF": "Temperature (°F)",
+      "normalRange": "Normal Range",
+      "last24Hours": "Last 24 Hours",
+      "last7Days": "Last 7 Days",
+      "last30Days": "Last 30 Days",
+      "last3Months": "Last 3 Months"
+    },
+    "healthRecords": {
+      "title": "Recent Health Records",
+      "vitalsRecord": "Vitals Record",
+      "recordType": "Record",
+      "viewAll": "View All Records",
+      "noRecords": "No health records available"
+    },
+    "workers": {
+      "title": "Connected ASHA Workers",
+      "findWorkers": "Find ASHA Workers",
+      "noWorkersFound": "No ASHA workers found in your area",
+      "tryDifferentLocation": "Try adjusting your location or check back later",
+      "searchingWorkers": "Searching for ASHA workers in your area...",
+      "languages": "Languages",
+      "experience": "Experience",
+      "years": "years",
+      "rating": "Rating",
+      "connect": "Connect",
+      "contact": "Contact",
+      "connected": "Connected",
+      "connectionSuccess": "Successfully connected to ASHA worker!",
+      "disconnectSuccess": "Successfully disconnected from ASHA worker.",
+      "connectionError": "Error connecting to worker. Please try again.",
+      "disconnectError": "Error disconnecting from worker. Please try again."
+    },
+    "emergency": {
+      "title": "Emergency Services",
+      "button": "Emergency Alert",
+      "alertSent": "EMERGENCY ALERT SENT!",
+      "alertError": "Error sending emergency alert. Please call 108 directly for medical emergency.",
+      "call108": "Call 108"
+    },
+    "actions": {
+      "addHealthData": "Add Health Data",
+      "refreshData": "Refresh Data",
+      "toggleWorkers": "Toggle Workers View",
+      "debugInfo": "Debug Info",
+      "showChart": "Show Chart",
+      "hideChart": "Hide Chart"
+    },
+    "timeRanges": {
+      "1d": "1 Day",
+      "7d": "7 Days",
+      "30d": "30 Days",
+      "90d": "3 Months"
+    },
+    "metrics": {
+      "all": "All Metrics",
+      "bloodPressure": "Blood Pressure",
+      "heartRate": "Heart Rate",
+      "bloodSugar": "Blood Sugar",
+      "weight": "Weight",
+      "temperature": "Temperature"
+    },
+    "healthStatus": {
+      "normal": "Normal",
+      "elevated": "Elevated",
+      "high": "High",
+      "low": "Low",
+      "critical": "Critical"
+    },
+    "quickActions": {
+      "predictiveAnalytics": "Predictive Analytics",
+      "aiInsights": "AI Insights",
+      "viewPredictions": "View Health Predictions"
+    }
+  },
+  "predictiveAnalytics": {
+    "title": "Predictive Health Analytics",
+    "subtitle": "AI-powered insights into your future health risks",
+    "loading": "Analyzing your health data...",
+    "overallScore": {
+      "title": "Overall Health Risk Score",
+      "description": "Based on your recent health trends",
+      "lowRisk": "Low Risk",
+      "mediumRisk": "Medium Risk",
+      "highRisk": "High Risk"
+    },
+    "timeframe": {
+      "1month": "Last 1 Month",
+      "3month": "Last 3 Months",
+      "6month": "Last 6 Months",
+      "1year": "Last 1 Year",
+      "7days": "Last 7 Days",
+      "14days": "Last 14 Days",
+      "30days": "Last 30 Days"
+    },
+    "riskCategories": {
+      "diabetes": {
+        "title": "Diabetes Risk",
+        "description": "Risk of developing Type 2 diabetes based on blood sugar trends and BMI"
+      },
+      "hypertension": {
+        "title": "Blood Pressure Risk",
+        "description": "Risk of developing high blood pressure based on current readings and trends"
+      },
+      "cardiovascular": {
+        "title": "Heart Disease Risk",
+        "description": "Risk of heart disease based on multiple vital signs and trends"
+      },
+      "obesity": {
+        "title": "Weight Management Risk",
+        "description": "Risk of obesity-related health issues based on BMI and weight trends"
+      }
+    },
+    "recommendations": {
+      "title": "Personalized Recommendations for",
+      "diabetesPrevention": "Diabetes Prevention",
+      "bloodPressureManagement": "Blood Pressure Management",
+      "heartHealth": "Heart Health",
+      "weightManagement": "Weight Management"
+    },
+    "healthTrends": {
+      "title": "Health Trends Over Time",
+      "bloodSugarLevels": "Blood Sugar Levels",
+      "bloodPressure": "Blood Pressure"
+    },
+    "actionItems": {
+      "title": "Immediate Action Items",
+      "scheduleCheckup": {
+        "title": "Schedule Checkup",
+        "description": "Book appointment with your healthcare provider within 2 weeks",
+        "button": "Find Doctors"
+      },
+      "trackDaily": {
+        "title": "Track Daily",
+        "description": "Continue logging your vitals daily for better predictions",
+        "button": "Log Vitals"
+      },
+      "reviewMonthly": {
+        "title": "Review Monthly",
+        "description": "Check your predictions monthly to track improvement",
+        "button": "Set Reminder"
+      }
+    },
+    "disclaimer": {
+      "title": "Important Disclaimer",
+      "text": "These predictions are based on statistical analysis of your health trends and should not replace professional medical advice. Always consult with qualified healthcare providers for medical decisions. This tool is designed to help you stay proactive about your health and identify potential areas of concern early."
+    },
+    "riskLevels": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "units": {
+      "mgdl": "mg/dL",
+      "mmhg": "mmHg",
+      "bpm": "BPM",
+      "kg": "kg"
+    },
+    "charts": {
+      "noData": "No data available",
+      "noValidData": "No valid data to display",
+      "addDataToSeeCharts": "Add health data to see trend charts"
+    },
+    "selectUser": "Select User",
+    "currentUser": "(You)",
+    "timeRange": "Time Range",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing...",
+    "userSelected": "User selected",
+    "noUserSelected": "No user selected",
+    "dataLoaded": "Data loaded",
+    "loadingData": "Loading data...",
+    "apiError": "API connection error",
+    "fetchingData": "Fetching data for",
+    "days": "days",
+    "error": {
+      "title": "Unable to Load Data",
+      "retry": "Try Again",
+      "fallbackNote": "Showing demo data while connection is restored"
+    },
+    "fallback": {
+      "consultASHA": "Consider consulting with your ASHA worker",
+      "maintainLifestyle": "Continue maintaining healthy lifestyle"
+    }
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Email is invalid",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "passwordsNotMatch": "Passwords do not match",
+    "nameMinLength": "Name must be at least 2 characters",
+    "unexpectedError": "An unexpected error occurred"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "confirmPasswordRequired": "Please confirm your password"
+  },
+  "profile": {
+    "title": "Complete Your Profile",
+    "subtitle": "Help us serve you better by completing your profile",
+    "completion": "Profile Completion",
+    "sections": {
+      "contact": "Contact Information",
+      "personal": "Personal Details",
+      "health": "Health Conditions",
+      "lifestyle": "Lifestyle",
+      "location": "Location",
+      "emergency": "Emergency Contact",
+      "preferences": "Preferences"
+    },
+    "fields": {
+      "phoneNumber": "Phone Number",
+      "gender": "Gender",
+      "age": "Age",
+      "dateOfBirth": "Date of Birth",
+      "weight": "Weight (kg)",
+      "height": "Height (cm)",
+      "existingConditions": "Existing Health Conditions",
+      "familyHistory": "Family History",
+      "allergies": "Allergies",
+      "medications": "Current Medications",
+      "dietType": "Diet Type",
+      "smokingStatus": "Smoking Status",
+      "alcoholConsumption": "Alcohol Consumption",
+      "physicalActivity": "Physical Activity Level",
+      "state": "State",
+      "district": "District",
+      "village": "Village/Town",
+      "pinCode": "PIN Code",
+      "emergencyContactName": "Emergency Contact Name",
+      "emergencyContactPhone": "Emergency Contact Phone",
+      "emergencyContactRelationship": "Relationship",
+      "profilePhoto": "Profile Photo",
+      "preferredAshaLanguage": "Preferred ASHA Language"
+    },
+    "placeholders": {
+      "phoneNumber": "Enter your phone number",
+      "age": "Enter your age",
+      "weight": "Enter weight in kg",
+      "height": "Enter height in cm",
+      "allergies": "List any allergies",
+      "medications": "List current medications",
+      "state": "Select your state",
+      "district": "Enter your district",
+      "village": "Enter village or town name",
+      "pinCode": "Enter PIN code",
+      "emergencyContactName": "Enter contact name",
+      "emergencyContactPhone": "Enter contact phone"
+    },
+    "options": {
+      "gender": {
+        "male": "Male",
+        "female": "Female",
+        "other": "Other"
+      },
+      "existingConditions": {
+        "diabetes": "Diabetes",
+        "hypertension": "Hypertension",
+        "none": "None",
+        "others": "Others"
+      },
+      "familyHistory": {
+        "diabetes": "Diabetes",
+        "hypertension": "Hypertension",
+        "heart_disease": "Heart Disease"
+      },
+      "dietType": {
+        "vegetarian": "Vegetarian",
+        "non_vegetarian": "Non-Vegetarian",
+        "vegan": "Vegan",
+        "other": "Other"
+      },
+      "smokingStatus": {
+        "yes": "Yes",
+        "no": "No",
+        "occasionally": "Occasionally"
+      },
+      "alcoholConsumption": {
+        "yes": "Yes",
+        "no": "No",
+        "occasionally": "Occasionally"
+      },
+      "physicalActivity": {
+        "sedentary": "Sedentary",
+        "moderate": "Moderate",
+        "active": "Active"
+      },
+      "relationship": {
+        "father": "Father",
+        "mother": "Mother",
+        "spouse": "Spouse",
+        "friend": "Friend",
+        "other": "Other"
+      }
+    },
+    "buttons": {
+      "saveProgress": "Save Progress",
+      "updateProfile": "Update Profile",
+      "skipForNow": "Skip for Now"
+    },
+    "messages": {
+      "profileUpdated": "Profile updated successfully!",
+      "completeProfile": "Please complete your profile to get better recommendations",
+      "profileIncomplete": "Your profile is {{percentage}}% complete"
+    }
+  },
+  "chatbot": {
+    "title": "Aarogya Sahayak",
+    "subtitle": "AI Health Assistant",
+    "openChat": "Open Health Assistant",
+    "welcome": "Welcome to your AI Health Assistant!",
+    "askAnything": "Ask me anything about health, diet, exercise, or wellness.",
+    "typePlaceholder": "Type your health question...",
+    "thinking": "Thinking...",
+    "disclaimer": "This is for informational purposes only. Consult healthcare professionals for medical advice.",
+    "healthTips": "Health Tips",
+    "dailyTips": "Daily Health Tips",
+    "voiceMode": "Voice Mode",
+    "error": {
+      "sendMessage": "Sorry, I encountered an error. Please try again.",
+      "startSession": "Failed to start chat session",
+      "loadHistory": "Failed to load conversation history"
+    }
+  },
+  "voice": {
+    "permissionRequired": "Microphone Permission Required",
+    "permissionMessage": "Please allow microphone access to use voice features.",
+    "grantPermission": "Grant Permission",
+    "recording": "Recording",
+    "startRecording": "Record Message",
+    "connecting": "Connecting...",
+    "startCall": "Voice Call",
+    "endCall": "End Call",
+    "inCall": "In voice call with health assistant",
+    "listeningStatus": "Listening...",
+    "readyStatus": "Voice assistant ready",
+    "connected": "Connected",
+    "transcription": "Transcription:",
+    "hints": "Tip: Speak clearly and mention your health questions. The assistant can understand multiple languages."
+  }
+}

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Chatbot - Aarogya Sahayak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
+    <style>
+        /* Additional styles for better appearance */
+        .chat-container {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 chat-container">
+    <div class="container mx-auto py-8">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">🏥 Aarogya Sahayak</h1>
+            <p class="text-xl text-gray-600">AI Health Assistant - Test Page</p>
+            <p class="text-sm text-gray-500 mt-2">Click the button in the bottom-right corner to start chatting</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
+            <h2 class="text-2xl font-semibold mb-4">Server Status</h2>
+            <div id="server-status" class="mb-6">
+                <p class="text-gray-600">Checking server connection...</p>
+            </div>
+
+            <h3 class="text-xl font-semibold mb-3">Test Instructions:</h3>
+            <div class="space-y-2 text-gray-700">
+                <p>• Make sure your backend server is running on <code class="bg-gray-100 px-2 py-1 rounded">http://localhost:5000</code></p>
+                <p>• Click the green heart button in the bottom-right corner</p>
+                <p>• Try asking health questions like:</p>
+                <ul class="ml-6 mt-2 space-y-1 list-disc">
+                    <li>"I have a headache, what should I do?"</li>
+                    <li>"What are some healthy eating tips?"</li>
+                    <li>"How much water should I drink daily?"</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Container -->
+    <div id="chatbot-root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { Heart, Bot, User, Send, Loader, X, Minimize2, Maximize2, Activity } = lucideReact;
+
+        const SimpleChatBot = () => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [isMinimized, setIsMinimized] = useState(false);
+            const [messages, setMessages] = useState([]);
+            const [inputMessage, setInputMessage] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            const [error, setError] = useState(null);
+
+            const messagesEndRef = useRef(null);
+            const API_BASE_URL = 'http://localhost:5000/api/chatbot';
+
+            useEffect(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages]);
+
+            useEffect(() => {
+                if (isOpen && messages.length === 0) {
+                    setMessages([{
+                        id: Date.now(),
+                        role: 'assistant',
+                        content: 'Hello! I\'m Aarogya Sahayak, your AI health assistant. How can I help you with your health queries today?',
+                        timestamp: new Date(),
+                        type: 'text'
+                    }]);
+                }
+            }, [isOpen]);
+
+            const sendMessage = async (content) => {
+                if (!content.trim()) return;
+
+                const userMessage = {
+                    id: Date.now(),
+                    role: 'user',
+                    content: content.trim(),
+                    timestamp: new Date(),
+                    type: 'text'
+                };
+
+                setMessages(prev => [...prev, userMessage]);
+                setInputMessage('');
+                setIsLoading(true);
+                setError(null);
+
+                try {
+                    console.log('Sending message to API:', content.trim());
+
+                    const response = await axios.post(`${API_BASE_URL}/test`, {
+                        message: content.trim(),
+                        language: 'en'
+                    }, {
+                        timeout: 30000,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    console.log('API Response:', response.data);
+
+                    if (response.data.success) {
+                        const assistantMessage = {
+                            id: Date.now() + 1,
+                            role: 'assistant',
+                            content: response.data.data.aiResponse,
+                            timestamp: new Date(),
+                            type: 'text'
+                        };
+                        setMessages(prev => [...prev, assistantMessage]);
+                    } else {
+                        throw new Error(response.data.error || 'Unknown error');
+                    }
+                } catch (error) {
+                    console.error('Failed to send message:', error);
+
+                    let errorContent = 'Sorry, I encountered an error. Please try again.';
+                    if (error.response?.status === 404) {
+                        errorContent = 'API endpoint not found. Please check if the server is running.';
+                    } else if (error.response?.status === 500) {
+                        errorContent = 'Server error. Please try again in a moment.';
+                    } else if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
+                        errorContent = 'Cannot connect to server. Please check if the backend is running on http://localhost:5000';
+                    }
+
+                    const errorMessage = {
+                        id: Date.now() + 1,
+                        role: 'assistant',
+                        content: errorContent,
+                        timestamp: new Date(),
+                        type: 'error'
+                    };
+                    setMessages(prev => [...prev, errorMessage]);
+                    setError(errorContent);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (inputMessage.trim()) {
+                    sendMessage(inputMessage);
+                }
+            };
+
+            const toggleChat = () => {
+                console.log('Chat button clicked, current isOpen:', isOpen);
+                setIsOpen(!isOpen);
+                setError(null);
+            };
+
+            const formatTimestamp = (timestamp) => {
+                return new Date(timestamp).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+
+            const renderMessage = (message) => {
+                const isUser = message.role === 'user';
+                const isError = message.type === 'error';
+
+                return (
+                    <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+                        <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} items-start max-w-[80%]`}>
+                            <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                                isUser ? 'bg-blue-500 text-white ml-2' : isError ? 'bg-red-500 text-white mr-2' : 'bg-green-500 text-white mr-2'
+                            }`}>
+                                {isUser ? React.createElement(User, { size: 16 }) : isError ? React.createElement(X, { size: 16 }) : React.createElement(Bot, { size: 16 })}
+                            </div>
+                            <div className={`rounded-lg px-4 py-2 ${
+                                isUser ? 'bg-blue-500 text-white' : isError ? 'bg-red-100 text-red-800 border border-red-300' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                                <div className="whitespace-pre-wrap">{message.content}</div>
+                                <div className={`text-xs mt-1 ${isUser ? 'text-blue-100' : isError ? 'text-red-600' : 'text-gray-500'}`}>
+                                    {formatTimestamp(message.timestamp)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            if (!isOpen) {
+                return (
+                    <div className="fixed bottom-4 right-4 z-50">
+                        <div className="relative group">
+                            <button
+                                onClick={toggleChat}
+                                className="bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-green-300"
+                                aria-label="Open AI Health Assistant"
+                                type="button"
+                            >
+                                {React.createElement(Heart, { size: 24 })}
+                            </button>
+                            <div className="absolute inset-0 bg-green-400 rounded-full animate-ping opacity-75 pointer-events-none"></div>
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                            <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                                Click to open AI Health Assistant
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className={`fixed bottom-4 right-4 z-50 transition-all duration-300 ${isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'}`}>
+                    <div className="bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col h-full">
+                        <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                {React.createElement(Heart, { size: 20 })}
+                                <span className="font-semibold">Aarogya Sahayak</span>
+                                {React.createElement(Activity, { size: 16, className: "animate-pulse" })}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <button onClick={() => setIsMinimized(!isMinimized)} className="hover:bg-white hover:bg-opacity-20 p-1 rounded">
+                                    {isMinimized ? React.createElement(Maximize2, { size: 16 }) : React.createElement(Minimize2, { size: 16 })}
+                                </button>
+                                <button onClick={() => setIsOpen(false)} className="hover:bg-white hover:bg-opacity-20 p-1 rounded">
+                                    {React.createElement(X, { size: 16 })}
+                                </button>
+                            </div>
+                        </div>
+
+                        {!isMinimized && (
+                            <>
+                                {error && (
+                                    <div className="bg-red-50 border-b border-red-200 p-3">
+                                        <div className="text-red-800 text-sm flex items-center">
+                                            {React.createElement(X, { size: 16, className: "mr-2" })}
+                                            {error}
+                                            <button onClick={() => setError(null)} className="ml-auto text-red-600 hover:text-red-800">
+                                                {React.createElement(X, { size: 14 })}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                                    {messages.length === 0 && !isLoading && (
+                                        <div className="text-center text-gray-500 py-8">
+                                            {React.createElement(Heart, { size: 48, className: "mx-auto mb-4 text-green-400" })}
+                                            <p>Welcome to your AI Health Assistant!</p>
+                                            <p className="text-sm mt-2">Ask me anything about health, diet, exercise, or wellness.</p>
+                                        </div>
+                                    )}
+
+                                    {messages.map(renderMessage)}
+
+                                    {isLoading && (
+                                        <div className="flex justify-start mb-4">
+                                            <div className="bg-gray-100 rounded-lg px-4 py-2 flex items-center space-x-2">
+                                                {React.createElement(Loader, { size: 16, className: "animate-spin" })}
+                                                <span className="text-gray-600 text-sm">Thinking...</span>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div ref={messagesEndRef} />
+                                </div>
+
+                                <div className="border-t border-gray-200 p-4">
+                                    <form onSubmit={handleSubmit} className="flex space-x-2">
+                                        <input
+                                            type="text"
+                                            value={inputMessage}
+                                            onChange={(e) => setInputMessage(e.target.value)}
+                                            placeholder="Type your health question..."
+                                            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            disabled={isLoading}
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={isLoading || !inputMessage.trim()}
+                                            className="bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white rounded-lg px-4 py-2 transition-colors duration-200 flex items-center"
+                                        >
+                                            {isLoading ? React.createElement(Loader, { size: 20, className: "animate-spin" }) : React.createElement(Send, { size: 20 })}
+                                        </button>
+                                    </form>
+                                    <div className="text-xs text-gray-500 mt-2 text-center">
+                                        This is for informational purposes only. Consult healthcare professionals for medical advice.
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Check server status
+        const checkServerStatus = async () => {
+            const statusDiv = document.getElementById('server-status');
+            try {
+                const response = await axios.get('http://localhost:5000/health', { timeout: 5000 });
+                statusDiv.innerHTML = '<p class="text-green-600">✅ Server is running and accessible</p>';
+            } catch (error) {
+                statusDiv.innerHTML = '<p class="text-red-600">❌ Server is not accessible. Please start the backend server.</p>';
+            }
+        };
+
+        // Render the chatbot
+        ReactDOM.render(React.createElement(SimpleChatBot), document.getElementById('chatbot-root'));
+
+        // Check server status on page load
+        checkServerStatus();
+    </script>
+</body>
+</html>
