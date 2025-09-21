@@ -8,7 +8,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.min.js"></script>
     <style>
+        :root {
+            --text-secondary: #9CA3AF;
+        }
+
         .glass-card {
             background: rgba(26, 26, 26, 0.6);
             backdrop-filter: blur(20px);
@@ -16,6 +21,13 @@
         }
 
         .gradient-text {
+            background: linear-gradient(135deg, #FF8C00 0%, #FFD700 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .accent-gradient-text {
             background: linear-gradient(135deg, #FF8C00 0%, #FFD700 100%);
             background-clip: text;
             -webkit-background-clip: text;
@@ -82,6 +94,36 @@
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
+        }
+
+        .service-node {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .service-node:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        .connection-line {
+            transition: stroke-width 0.2s ease;
+        }
+
+        .connection-line:hover {
+            stroke-width: 3;
+        }
+
+        .diagram-container {
+            background: radial-gradient(circle at 50% 50%, rgba(255, 140, 0, 0.05) 0%, transparent 70%);
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
     </style>
 </head>
@@ -174,6 +216,27 @@
                         ✨ <span class="gradient-text">Modernization Results</span>
                     </h2>
 
+                    <!-- The Insight Engine -->
+                    <div id="insight-engine-card" class="glass-card rounded-xl p-6 mb-8 border-2 border-amber-400">
+                        <h3 class="text-2xl font-bold text-center mb-4 accent-gradient-text">The Insight Engine</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p class="text-sm font-semibold" style="color: var(--text-secondary);">MANUAL EFFORT</p>
+                                <p id="manual-hours" class="text-xl font-bold">--</p>
+                                <p id="manual-timeline" class="text-sm" style="color: var(--text-secondary);">--</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold" style="color: var(--text-secondary);">ESTIMATED COST (USD)</p>
+                                <p id="manual-cost" class="text-3xl font-bold text-red-500">--</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold" style="color: var(--text-secondary);">SAVINGS w/ OUR TOOL</p>
+                                <p class="text-3xl font-bold text-green-500">>85%</p>
+                            </div>
+                        </div>
+                        <p id="insight-summary" class="text-center mt-4 text-sm" style="color: var(--text-secondary);">--</p>
+                    </div>
+
                     <!-- Tab Navigation -->
                     <div class="flex flex-wrap justify-center gap-4 mb-8">
                         <button class="tab-btn tab-active px-6 py-3 rounded-lg font-medium" data-tab="db-schema">
@@ -187,6 +250,9 @@
                         </button>
                         <button class="tab-btn tab-inactive px-6 py-3 rounded-lg font-medium" data-tab="microservices">
                             🏗️ Microservices
+                        </button>
+                        <button class="tab-btn tab-inactive px-6 py-3 rounded-lg font-medium" data-tab="diagram">
+                            📊 Architecture
                         </button>
                     </div>
 
@@ -218,9 +284,104 @@
 
                         <!-- Microservices Tab -->
                         <div id="microservices-content" class="tab-panel hidden">
-                            <h3 class="text-xl font-semibold mb-4">Microservices Architecture Suggestions</h3>
+                            <h3 class="text-xl font-semibold mb-4">🏗️ Microservices Architecture</h3>
+
+                            <!-- View Toggle -->
+                            <div class="flex justify-center mb-6">
+                                <div class="glass-card rounded-lg p-1 flex">
+                                    <button id="diagram-view-btn" class="px-6 py-2 rounded-md bg-orange-500 text-black font-medium transition-all">
+                                        🎨 Interactive Diagram
+                                    </button>
+                                    <button id="code-view-btn" class="px-6 py-2 rounded-md text-gray-300 font-medium transition-all hover:text-white">
+                                        📝 Architecture Code
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Visual Diagram -->
+                            <div id="microservices-diagram" class="mb-6">
+                                <div class="glass-card rounded-lg p-6 bg-gray-800">
+                                    <div class="text-center mb-4">
+                                        <h4 class="text-lg font-semibold gradient-text">Interactive Microservices Architecture</h4>
+                                        <p class="text-gray-400 text-sm mt-1">🖱️ Click services for details • 🎯 Drag to reposition • ✨ Hover for effects</p>
+                                    </div>
+
+                                    <!-- Diagram Container -->
+                                    <div id="diagram-container" class="relative w-full h-96 border border-gray-700 rounded-lg bg-gray-900 overflow-hidden diagram-container">
+                                        <!-- SVG for connections -->
+                                        <svg id="microservices-svg" class="absolute inset-0 w-full h-full pointer-events-none">
+                                            <defs>
+                                                <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                                                        refX="10" refY="3.5" orient="auto">
+                                                    <polygon points="0 0, 10 3.5, 0 7" fill="#FF8C00" />
+                                                </marker>
+                                                <filter id="glow">
+                                                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                                    <feMerge>
+                                                        <feMergeNode in="coloredBlur"/>
+                                                        <feMergeNode in="SourceGraphic"/>
+                                                    </feMerge>
+                                                </filter>
+                                                <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                    <stop offset="0%" style="stop-color:#FF8C00;stop-opacity:0.8" />
+                                                    <stop offset="100%" style="stop-color:#FFD700;stop-opacity:0.8" />
+                                                </linearGradient>
+                                            </defs>
+                                        </svg>
+
+                                        <!-- Service nodes container -->
+                                        <div id="services-container" class="absolute inset-0"></div>
+                                    </div>
+
+                                    <!-- Service Details Panel -->
+                                    <div id="service-details" class="hidden mt-6 p-4 bg-gray-700 rounded-lg border border-orange-500/30">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <h5 class="font-semibold text-orange-400" id="service-title">Service Details</h5>
+                                            <button id="close-details" class="text-gray-400 hover:text-white">✕</button>
+                                        </div>
+                                        <div id="service-info" class="text-sm text-gray-300">
+                                            <!-- Service details will be populated here -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Architecture Legend -->
+                                    <div class="mt-4 p-3 bg-gray-800 rounded-lg">
+                                        <h5 class="text-sm font-semibold text-gray-300 mb-2">🏗️ Architecture Legend</h5>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                                <span class="text-gray-300">API Gateway</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                                <span class="text-gray-300">Core Services</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                                <span class="text-gray-300">Data Services</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                                <span class="text-gray-300">External Services</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Code View -->
+                            <div id="microservices-code-view" class="hidden glass-card rounded-lg p-4 bg-gray-800">
+                                <pre><code class="language-markdown" id="microservices-code"># Microservices architecture will appear here after processing</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Architecture Diagram Tab -->
+                        <div id="diagram-content" class="tab-panel hidden">
+                            <h3 class="text-xl font-semibold mb-4">📊 Architecture Diagram</h3>
                             <div class="glass-card rounded-lg p-4 bg-gray-800">
-                                <pre><code class="language-markdown" id="microservices-code"># Microservices suggestions will appear here after processing</code></pre>
+                                <pre><code class="language-mermaid">
+                                    <!-- Mermaid.js code will go here -->
+                                </code></pre>
                             </div>
                         </div>
                     </div>
@@ -242,6 +403,9 @@
             let copybookFile = null;
             let datafileFile = null;
             let currentResults = null;
+            let microservicesData = [];
+            let selectedService = null;
+            let isDragging = false;
 
             // Get DOM elements
             const copybookBtn = document.getElementById('copybook-btn');
@@ -260,6 +424,12 @@
             // Tab elements
             const tabBtns = document.querySelectorAll('.tab-btn');
             const tabPanels = document.querySelectorAll('.tab-panel');
+
+            // Microservices diagram elements
+            const diagramViewBtn = document.getElementById('diagram-view-btn');
+            const codeViewBtn = document.getElementById('code-view-btn');
+            const microservicesDiagram = document.getElementById('microservices-diagram');
+            const microservicesCodeView = document.getElementById('microservices-code-view');
 
             // File selection handlers
             copybookBtn.addEventListener('click', () => {
@@ -324,6 +494,347 @@
                 });
             });
 
+            // Microservices view toggle handlers
+            diagramViewBtn.addEventListener('click', () => {
+                microservicesDiagram.classList.remove('hidden');
+                microservicesCodeView.classList.add('hidden');
+                diagramViewBtn.classList.add('bg-orange-500', 'text-black');
+                diagramViewBtn.classList.remove('text-gray-300');
+                codeViewBtn.classList.remove('bg-orange-500', 'text-black');
+                codeViewBtn.classList.add('text-gray-300');
+            });
+
+            codeViewBtn.addEventListener('click', () => {
+                microservicesDiagram.classList.add('hidden');
+                microservicesCodeView.classList.remove('hidden');
+                codeViewBtn.classList.add('bg-orange-500', 'text-black');
+                codeViewBtn.classList.remove('text-gray-300');
+                diagramViewBtn.classList.remove('bg-orange-500', 'text-black');
+                diagramViewBtn.classList.add('text-gray-300');
+            });
+
+            // Close service details
+            document.getElementById('close-details').addEventListener('click', () => {
+                document.getElementById('service-details').classList.add('hidden');
+                document.querySelectorAll('.service-node').forEach(node => {
+                    node.classList.remove('ring-2', 'ring-orange-400');
+                });
+            });
+
+            // Generate microservices architecture based on data
+            function generateMicroservicesArchitecture(jsonData) {
+                const baseServices = [
+                    {
+                        id: 'api-gateway',
+                        name: 'API Gateway',
+                        type: 'gateway',
+                        color: '#3B82F6',
+                        description: 'Central entry point for all client requests with rate limiting and authentication',
+                        endpoints: ['/api/v1/*', '/auth', '/health'],
+                        technologies: ['Express.js', 'Rate Limiting', 'JWT', 'CORS'],
+                        position: { x: 50, y: 15 },
+                        connections: ['user-service', 'data-service', 'reporting-service']
+                    },
+                    {
+                        id: 'user-service',
+                        name: 'User Service',
+                        type: 'core',
+                        color: '#10B981',
+                        description: 'Manages user authentication, authorization, and profile management',
+                        endpoints: ['/users', '/auth/login', '/auth/logout', '/profiles'],
+                        technologies: ['JWT', 'bcrypt', 'Node.js', 'Passport.js'],
+                        position: { x: 20, y: 45 },
+                        connections: ['notification-service']
+                    },
+                    {
+                        id: 'data-service',
+                        name: 'Data Service',
+                        type: 'data',
+                        color: '#8B5CF6',
+                        description: 'Handles converted legacy data operations with caching and optimization',
+                        endpoints: ['/records', '/search', '/export', '/import'],
+                        technologies: ['PostgreSQL', 'Redis', 'GraphQL', 'Elasticsearch'],
+                        position: { x: 80, y: 45 },
+                        connections: ['reporting-service']
+                    },
+                    {
+                        id: 'reporting-service',
+                        name: 'Reporting Service',
+                        type: 'core',
+                        color: '#10B981',
+                        description: 'Generates dynamic reports and analytics from modernized data',
+                        endpoints: ['/reports', '/analytics', '/dashboard', '/export'],
+                        technologies: ['Chart.js', 'PDF Generation', 'Excel Export', 'Caching'],
+                        position: { x: 50, y: 75 },
+                        connections: ['notification-service']
+                    },
+                    {
+                        id: 'notification-service',
+                        name: 'Notification Service',
+                        type: 'external',
+                        color: '#F59E0B',
+                        description: 'Handles email notifications, alerts, and real-time updates',
+                        endpoints: ['/notify', '/templates', '/subscriptions', '/webhooks'],
+                        technologies: ['SendGrid', 'WebSockets', 'Queue System', 'Templates'],
+                        position: { x: 20, y: 85 },
+                        connections: []
+                    }
+                ];
+
+                // Analyze JSON data to add domain-specific services
+                if (jsonData && Array.isArray(jsonData) && jsonData.length > 0) {
+                    const sample = jsonData[0];
+                    const fields = Object.keys(sample).map(key => key.toLowerCase());
+
+                    // Customer/Client management service
+                    if (fields.some(field => field.includes('customer') || field.includes('client') || field.includes('name'))) {
+                        baseServices.push({
+                            id: 'customer-service',
+                            name: 'Customer Service',
+                            type: 'core',
+                            color: '#10B981',
+                            description: 'Manages customer relationships, profiles, and interaction history',
+                            endpoints: ['/customers', '/crm', '/contacts', '/history'],
+                            technologies: ['CRM Integration', 'Customer API', 'Data Validation', 'Search'],
+                            position: { x: 80, y: 75 },
+                            connections: ['notification-service', 'data-service']
+                        });
+
+                        // Update connections
+                        baseServices.find(s => s.id === 'api-gateway').connections.push('customer-service');
+                    }
+
+                    // Financial service
+                    if (fields.some(field => field.includes('amount') || field.includes('price') || field.includes('cost') || field.includes('payment'))) {
+                        baseServices.push({
+                            id: 'financial-service',
+                            name: 'Financial Service',
+                            type: 'core',
+                            color: '#10B981',
+                            description: 'Processes financial transactions, billing, and payment operations',
+                            endpoints: ['/transactions', '/billing', '/payments', '/invoices'],
+                            technologies: ['Payment Gateway', 'Financial API', 'Audit Trail', 'Encryption'],
+                            position: { x: 35, y: 105 },
+                            connections: ['data-service', 'notification-service']
+                        });
+
+                        baseServices.find(s => s.id === 'api-gateway').connections.push('financial-service');
+                    }
+
+                    // Inventory/Product service
+                    if (fields.some(field => field.includes('product') || field.includes('item') || field.includes('inventory') || field.includes('stock'))) {
+                        baseServices.push({
+                            id: 'inventory-service',
+                            name: 'Inventory Service',
+                            type: 'core',
+                            color: '#10B981',
+                            description: 'Manages product catalog, inventory levels, and stock operations',
+                            endpoints: ['/inventory', '/products', '/stock', '/catalog'],
+                            technologies: ['Inventory API', 'Stock Management', 'Barcode Scanner', 'Tracking'],
+                            position: { x: 65, y: 105 },
+                            connections: ['data-service', 'reporting-service']
+                        });
+
+                        baseServices.find(s => s.id === 'api-gateway').connections.push('inventory-service');
+                    }
+                }
+
+                return baseServices;
+            }
+
+            // Render the interactive microservices diagram
+            function renderMicroservicesDiagram(services) {
+                const container = document.getElementById('services-container');
+                const svg = document.getElementById('microservices-svg');
+
+                // Clear existing content
+                container.innerHTML = '';
+                const defs = svg.querySelector('defs');
+                svg.innerHTML = '';
+                svg.appendChild(defs);
+
+                // Draw connections first
+                services.forEach(service => {
+                    if (service.connections) {
+                        service.connections.forEach(targetId => {
+                            const targetService = services.find(s => s.id === targetId);
+                            if (targetService) {
+                                drawConnection(svg, service, targetService);
+                            }
+                        });
+                    }
+                });
+
+                // Create service nodes
+                services.forEach(service => {
+                    createServiceNode(container, service, services);
+                });
+            }
+
+            function drawConnection(svg, fromService, toService) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', `${fromService.position.x}%`);
+                line.setAttribute('y1', `${fromService.position.y}%`);
+                line.setAttribute('x2', `${toService.position.x}%`);
+                line.setAttribute('y2', `${toService.position.y}%`);
+                line.setAttribute('stroke', 'url(#connectionGradient)');
+                line.setAttribute('stroke-width', '2');
+                line.setAttribute('marker-end', 'url(#arrowhead)');
+                line.setAttribute('opacity', '0.7');
+                line.classList.add('connection-line');
+                svg.appendChild(line);
+            }
+
+            function createServiceNode(container, service, allServices) {
+                const serviceNode = document.createElement('div');
+                serviceNode.className = 'absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:z-10';
+                serviceNode.style.left = `${service.position.x}%`;
+                serviceNode.style.top = `${service.position.y}%`;
+
+                serviceNode.innerHTML = `
+                    <div class="service-node relative p-4 rounded-xl border-2 shadow-lg hover:shadow-2xl"
+                         style="background: linear-gradient(135deg, ${service.color}15, ${service.color}25); border-color: ${service.color}; min-width: 120px;"
+                         data-service-id="${service.id}">
+                        <div class="text-center">
+                            <div class="text-xs font-bold text-white mb-1">
+                                ${getServiceIcon(service.type)} ${service.name}
+                            </div>
+                            <div class="text-xs text-gray-300">
+                                ${service.type}
+                            </div>
+                        </div>
+                        <div class="absolute -top-1 -right-1 w-4 h-4 rounded-full pulse-animation"
+                             style="background: ${service.color}; box-shadow: 0 0 10px ${service.color}50;"></div>
+                        <div class="absolute inset-0 rounded-xl border-2 border-transparent hover:border-orange-400 transition-all duration-300"></div>
+                    </div>
+                `;
+
+                // Click handler for service details
+                serviceNode.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showServiceDetails(service);
+                    highlightService(serviceNode);
+                });
+
+                // Drag functionality
+                let dragStartX, dragStartY, startLeft, startTop;
+
+                serviceNode.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    dragStartX = e.clientX;
+                    dragStartY = e.clientY;
+                    startLeft = service.position.x;
+                    startTop = service.position.y;
+                    serviceNode.style.zIndex = '1000';
+                    serviceNode.style.cursor = 'grabbing';
+                    e.preventDefault();
+                });
+
+                container.appendChild(serviceNode);
+            }
+
+            function getServiceIcon(type) {
+                const icons = {
+                    'gateway': '🚪',
+                    'core': '⚙️',
+                    'data': '💾',
+                    'external': '🌐'
+                };
+                return icons[type] || '🔧';
+            }
+
+            function highlightService(serviceNode) {
+                // Remove previous highlights
+                document.querySelectorAll('.service-node').forEach(node => {
+                    node.classList.remove('ring-2', 'ring-orange-400');
+                });
+
+                // Highlight selected service
+                serviceNode.querySelector('.service-node').classList.add('ring-2', 'ring-orange-400');
+            }
+
+            function showServiceDetails(service) {
+                selectedService = service;
+                const detailsPanel = document.getElementById('service-details');
+                const titleElement = document.getElementById('service-title');
+                const infoElement = document.getElementById('service-info');
+
+                titleElement.innerHTML = `${getServiceIcon(service.type)} ${service.name}`;
+                infoElement.innerHTML = `
+                    <div class="grid gap-4">
+                        <div>
+                            <div class="font-medium text-orange-400 mb-1">📋 Description</div>
+                            <div class="text-gray-300">${service.description}</div>
+                        </div>
+                        <div>
+                            <div class="font-medium text-orange-400 mb-1">🏷️ Service Type</div>
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-medium"
+                                  style="background: ${service.color}20; color: ${service.color}; border: 1px solid ${service.color};">
+                                ${service.type.toUpperCase()}
+                            </span>
+                        </div>
+                        <div>
+                            <div class="font-medium text-orange-400 mb-2">🔗 API Endpoints</div>
+                            <div class="grid gap-1">
+                                ${service.endpoints.map(endpoint =>
+                                    `<span class="inline-block bg-gray-600 px-3 py-1 rounded text-xs font-mono">${endpoint}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="font-medium text-orange-400 mb-2">🛠️ Technologies</div>
+                            <div class="flex flex-wrap gap-1">
+                                ${service.technologies.map(tech =>
+                                    `<span class="inline-block bg-blue-600 px-2 py-1 rounded text-xs">${tech}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                detailsPanel.classList.remove('hidden');
+                detailsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Global mouse event handlers for dragging
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging && selectedService) {
+                    const container = document.getElementById('diagram-container');
+                    const containerRect = container.getBoundingClientRect();
+
+                    const deltaX = e.clientX - dragStartX;
+                    const deltaY = e.clientY - dragStartY;
+
+                    const newX = startLeft + (deltaX / containerRect.width) * 100;
+                    const newY = startTop + (deltaY / containerRect.height) * 100;
+
+                    // Keep within bounds
+                    if (newX >= 5 && newX <= 95 && newY >= 5 && newY <= 95) {
+                        selectedService.position.x = newX;
+                        selectedService.position.y = newY;
+
+                        // Update position immediately
+                        const serviceNode = document.querySelector(`[data-service-id="${selectedService.id}"]`).parentElement;
+                        serviceNode.style.left = `${newX}%`;
+                        serviceNode.style.top = `${newY}%`;
+
+                        // Redraw connections
+                        renderMicroservicesDiagram(microservicesData);
+                    }
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    selectedService = null;
+                    document.querySelectorAll('.service-node').forEach(node => {
+                        node.style.cursor = 'pointer';
+                        node.style.zIndex = 'auto';
+                    });
+                }
+            });
+
             // Main modernization handler
             modernizeBtn.addEventListener('click', async () => {
                 // Validate files
@@ -349,26 +860,19 @@
                 hideError();
 
                 try {
-                    // Prepare form data
+                    // Create FormData for file upload
                     const formData = new FormData();
                     formData.append('copybook', copybookFile);
                     formData.append('datafile', datafileFile);
 
-                    // Get auth token (use demo token for prototype)
-                    const authToken = localStorage.getItem('authToken') || 'HACKATHON_DEMO_TOKEN';
-
-                    // Make API request
+                    // Make actual API call to backend
                     const response = await fetch('/api/v1/modernize', {
                         method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${authToken}`
-                        },
                         body: formData
                     });
 
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                        throw new Error(`API Error: ${response.status} ${response.statusText}`);
                     }
 
                     const result = await response.json();
@@ -377,8 +881,189 @@
                         throw new Error(result.error || 'Modernization failed');
                     }
 
-                    // Store results
+                    // Use actual API response
+                    /*
+                    // Demo result structure - REMOVED FOR REAL API INTEGRATION
+                    const result = {
+                        success: true,
+                        files: {
+                            copybook: copybookFile.name,
+                            datafile: datafileFile.name
+                        },
+                        modernizationAssets: {
+                            dbSchema: `-- Generated PostgreSQL Schema for ${copybookFile.name}
+CREATE TABLE legacy_data (
+    id SERIAL PRIMARY KEY,
+    record_id VARCHAR(50) NOT NULL,
+    customer_name VARCHAR(100),
+    amount DECIMAL(10,2),
+    transaction_date DATE,
+    status VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_legacy_data_record_id ON legacy_data(record_id);
+CREATE INDEX idx_legacy_data_customer ON legacy_data(customer_name);
+CREATE INDEX idx_legacy_data_date ON legacy_data(transaction_date);`,
+
+                            restApi: `// Generated REST API for ${datafileFile.name}
+const express = require('express');
+const { Pool } = require('pg');
+const router = express.Router();
+
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL
+});
+
+// Get all records
+router.get('/records', async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+        const offset = (page - 1) * limit;
+
+        const result = await pool.query(
+            'SELECT * FROM legacy_data ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+            [limit, offset]
+        );
+
+        res.json({
+            success: true,
+            data: result.rows,
+            pagination: { page, limit, total: result.rowCount }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get record by ID
+router.get('/records/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query('SELECT * FROM legacy_data WHERE id = $1', [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Record not found' });
+        }
+
+        res.json({ success: true, data: result.rows[0] });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+module.exports = router;`,
+
+                            jsonData: [
+                                {
+                                    "id": 1,
+                                    "record_id": "REC001",
+                                    "customer_name": "John Doe",
+                                    "amount": 1250.75,
+                                    "transaction_date": "2024-01-15",
+                                    "status": "completed"
+                                },
+                                {
+                                    "id": 2,
+                                    "record_id": "REC002",
+                                    "customer_name": "Jane Smith",
+                                    "amount": 3400.25,
+                                    "transaction_date": "2024-01-16",
+                                    "status": "pending"
+                                },
+                                {
+                                    "id": 3,
+                                    "record_id": "REC003",
+                                    "customer_name": "Bob Johnson",
+                                    "amount": 750.00,
+                                    "transaction_date": "2024-01-17",
+                                    "status": "completed"
+                                }
+                            ],
+
+                            microservices: `# Microservices Architecture for Legacy System Modernization
+
+## 🏗️ Architecture Overview
+This modernized system follows a microservices architecture pattern, breaking down the monolithic AS/400 system into smaller, manageable services.
+
+## 🚪 API Gateway
+- **Purpose**: Central entry point for all client requests
+- **Responsibilities**: Authentication, rate limiting, routing, load balancing
+- **Technology Stack**: Express.js, JWT, Rate Limiting middleware
+
+## ⚙️ Core Business Services
+
+### User Service
+- **Purpose**: Handle user authentication and authorization
+- **Endpoints**: /users, /auth, /profiles
+- **Database**: PostgreSQL with user tables
+
+### Data Service
+- **Purpose**: Manage converted legacy data operations
+- **Endpoints**: /records, /search, /export
+- **Database**: PostgreSQL with Redis caching
+
+### Reporting Service
+- **Purpose**: Generate reports and analytics
+- **Endpoints**: /reports, /analytics, /dashboard
+- **Technology**: Chart.js, PDF generation
+
+## 💾 Data Layer
+- **Primary Database**: PostgreSQL for transactional data
+- **Cache Layer**: Redis for frequently accessed data
+- **Search Engine**: Elasticsearch for complex queries
+
+## 🌐 External Services
+- **Notification Service**: Email and push notifications
+- **File Storage**: AWS S3 or equivalent for document storage
+- **Monitoring**: Application performance monitoring
+
+## 📡 Communication Patterns
+- **Synchronous**: REST APIs for real-time operations
+- **Asynchronous**: Message queues for background processing
+- **Event-Driven**: Event sourcing for audit trails
+
+## 🔒 Security Considerations
+- JWT tokens for authentication
+- Rate limiting to prevent abuse
+- Input validation and sanitization
+- HTTPS encryption for all communications
+
+## 🚀 Deployment Strategy
+- **Containerization**: Docker containers for each service
+- **Orchestration**: Kubernetes for container management
+- **CI/CD**: Automated deployment pipelines
+- **Monitoring**: Centralized logging and metrics`,
+
+                            microserviceDiagram: `graph TD
+    A[User] --> B{Load Balancer}
+    B --> C[Customer Service]
+    B --> D[Data Service]
+    C --> E[(Customer Database)]
+    D --> F[(Legacy Data)]`,
+
+                            insightEngine: {
+                                analysisTitle: "The Insight Engine",
+                                manualEffort: {
+                                    hours: "480-720",
+                                    timeline: "3-4 months",
+                                    costUSD: "$48,000-$72,000"
+                                },
+                                automatedTool: {
+                                    time: "2-3 weeks",
+                                    costUSD: "$5,000-$8,000"
+                                },
+                                summary: "Automated modernization tools can reduce development time by 85% and costs by 80% compared to manual migration approaches. This analysis shows significant ROI through reduced timeline and development resources."
+                            }
+                        }
+                    };
+                    */
+
+                    // Store results from actual API
                     currentResults = result;
+                    console.log('API Response received:', result);
+                    console.log('Modernization Assets:', result.modernizationAssets);
 
                     // Populate results
                     populateResults(result.modernizationAssets);
@@ -400,6 +1085,8 @@
             });
 
             function populateResults(assets) {
+                console.log('populateResults called with assets:', assets);
+
                 // Populate database schema
                 const dbSchemaCode = document.getElementById('db-schema-code');
                 dbSchemaCode.textContent = assets.dbSchema || 'No database schema generated';
@@ -410,19 +1097,55 @@
 
                 // Populate JSON data
                 const jsonDataCode = document.getElementById('json-data-code');
+                let jsonData = null;
                 if (Array.isArray(assets.jsonData)) {
+                    jsonData = assets.jsonData;
                     jsonDataCode.textContent = JSON.stringify(assets.jsonData, null, 2);
                 } else {
                     jsonDataCode.textContent = assets.jsonData || 'No JSON data generated';
                 }
 
-                // Populate microservices
+                // Populate microservices text
                 const microservicesCode = document.getElementById('microservices-code');
                 if (Array.isArray(assets.microservices)) {
                     microservicesCode.textContent = assets.microservices.join('\n\n');
                 } else {
                     microservicesCode.textContent = assets.microservices || 'No microservices suggestions generated';
                 }
+
+                // Populate Insight Engine data
+                if (assets.insightEngine) {
+                    console.log('Populating Insight Engine with data:', assets.insightEngine);
+                    const insightEngine = assets.insightEngine;
+                    document.getElementById('manual-hours').textContent = insightEngine.manualEffort.hours || '--';
+                    document.getElementById('manual-timeline').textContent = insightEngine.manualEffort.timeline || '--';
+                    document.getElementById('manual-cost').textContent = insightEngine.manualEffort.costUSD || '--';
+                    document.getElementById('insight-summary').textContent = insightEngine.summary || 'No analysis available';
+                } else {
+                    console.log('No insightEngine data found in assets');
+                }
+
+                // Populate Mermaid diagram
+                if (assets.microserviceDiagram) {
+                    console.log('Populating Mermaid diagram with data:', assets.microserviceDiagram);
+                    const diagramCode = document.querySelector('#diagram-content code');
+                    diagramCode.textContent = assets.microserviceDiagram;
+
+                    // Initialize Mermaid configuration and render the diagram
+                    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+                    // Use setTimeout to ensure DOM is ready for Mermaid rendering
+                    setTimeout(() => {
+                        console.log('Running mermaid.run()');
+                        mermaid.run();
+                    }, 100);
+                } else {
+                    console.log('No microserviceDiagram data found in assets');
+                }
+
+                // Generate and render microservices diagram
+                microservicesData = generateMicroservicesArchitecture(jsonData);
+                renderMicroservicesDiagram(microservicesData);
 
                 // Apply syntax highlighting
                 Prism.highlightAll();
@@ -453,28 +1176,46 @@
                 const assets = currentResults.modernizationAssets;
                 const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
 
-                // Create download content
-                const content = `# AS/400 Modernization Results
+                // Create comprehensive download content
+                const content = `# AS/400 Legacy Modernization Results
 Generated on: ${new Date().toLocaleString()}
 Files: ${currentResults.files.copybook}, ${currentResults.files.datafile}
 
-## Database Schema
+## 🗄️ Database Schema
 \`\`\`sql
 ${assets.dbSchema}
 \`\`\`
 
-## REST API
+## 🔗 REST API Implementation
 \`\`\`javascript
 ${assets.restApi}
 \`\`\`
 
-## JSON Data
+## 📊 Sample JSON Data
 \`\`\`json
 ${typeof assets.jsonData === 'string' ? assets.jsonData : JSON.stringify(assets.jsonData, null, 2)}
 \`\`\`
 
-## Microservices Suggestions
+## 🏗️ Microservices Architecture
 ${Array.isArray(assets.microservices) ? assets.microservices.join('\n\n') : assets.microservices}
+
+## 📊 Architecture Diagram (Mermaid.js)
+\`\`\`mermaid
+${assets.microserviceDiagram || 'No diagram generated'}
+\`\`\`
+
+## 💰 ROI Analysis - The Insight Engine
+${assets.insightEngine ? `
+**Manual Effort**: ${assets.insightEngine.manualEffort.hours} (${assets.insightEngine.manualEffort.timeline})
+**Manual Cost**: ${assets.insightEngine.manualEffort.costUSD}
+**Automated Tool Time**: ${assets.insightEngine.automatedTool.time}
+**Automated Tool Cost**: ${assets.insightEngine.automatedTool.costUSD}
+
+**Summary**: ${assets.insightEngine.summary}
+` : 'No ROI analysis available'}
+
+---
+*Generated by AS/400 Legacy Modernization Assistant*
 `;
 
                 // Create and trigger download
@@ -489,8 +1230,8 @@ ${Array.isArray(assets.microservices) ? assets.microservices.join('\n\n') : asse
                 URL.revokeObjectURL(url);
             });
 
-            // Initialize
-            console.log('AS/400 Modernization Assistant initialized');
+            // Initialize application
+            console.log('🚀 AS/400 Legacy Modernization Assistant initialized successfully');
         });
     </script>
 </body>
