@@ -1,7 +1,28 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { MongoClient } = require('mongodb');
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// MongoDB connection
+let mongoClient = null;
+let db = null;
+
+// Initialize MongoDB connection
+async function initializeDatabase() {
+    if (!mongoClient) {
+        try {
+            mongoClient = new MongoClient(process.env.MONGODB_URI || 'mongodb://localhost:27017/modernization');
+            await mongoClient.connect();
+            db = mongoClient.db('modernization');
+            console.log('Connected to MongoDB successfully');
+        } catch (error) {
+            console.error('MongoDB connection error:', error);
+            throw error;
+        }
+    }
+    return db;
+}
 
 /**
  * Parse COBOL Copybook Content
@@ -352,9 +373,177 @@ async function modernizeLegacyFiles(req, res) {
     }
 }
 
+/**
+ * Talk to your Data - Convert natural language questions to MongoDB queries and execute them
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+async function queryData(req, res) {
+    try {
+        // Validate request body
+        const { question } = req.body;
+
+        if (!question || typeof question !== 'string') {
+            return res.status(400).json({
+                success: false,
+                error: 'Question field is required and must be a string'
+            });
+        }
+
+        console.log(`Processing data query for user: ${req.user.email}`);
+        console.log(`Question: ${question}`);
+
+        // Initialize database connection
+        const database = await initializeDatabase();
+
+        // Call Gemini AI to convert question to MongoDB query
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const prompt = `You are an expert AI data analyst that specializes in converting natural language questions into valid MongoDB find queries.
+
+The data is stored in a collection named 'accounts', and the documents have fields like: ACCT_NO, ACCT_LIMIT, ACCT_BALANCE, LAST_NAME, FIRST_NAME, STREET_ADDR, CITY_COUNTY, USA_STATE, COMMENTS.
+
+The user's question is:
+"${question}"
+
+Your response must be a single, valid JSON object and nothing else. The JSON object must contain one key, "mongoQuery", which is the MongoDB find query object.
+
+Example: If the question is "list all customers from New York", your output should be:
+{ "mongoQuery": { "USA_STATE": "New York" } }
+
+Example: If the question is "find the customer with the last name Stark", your output should be:
+{ "mongoQuery": { "LAST_NAME": "Stark" } }`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        // Clean and parse the AI response
+        let cleanedText = text.trim();
+        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+        cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+
+        let mongoQueryObject;
+        try {
+            const aiResponse = JSON.parse(cleanedText);
+            mongoQueryObject = aiResponse.mongoQuery;
+        } catch (parseError) {
+            console.error('Failed to parse AI response:', parseError);
+            console.error('Raw AI response:', text);
+            throw new Error('Invalid query response from AI');
+        }
+
+        console.log('Generated MongoDB query:', JSON.stringify(mongoQueryObject, null, 2));
+
+        // Execute the MongoDB query
+        const collection = database.collection('accounts');
+        const queryResults = await collection.find(mongoQueryObject).limit(100).toArray();
+
+        console.log(`Query executed successfully. Found ${queryResults.length} results.`);
+
+        // Return the results
+        res.status(200).json({
+            success: true,
+            timestamp: new Date().toISOString(),
+            user: req.user.email,
+            question: question,
+            mongoQuery: mongoQueryObject,
+            resultCount: queryResults.length,
+            data: queryResults
+        });
+
+    } catch (error) {
+        console.error('Data query error:', error);
+
+        res.status(500).json({
+            success: false,
+            error: error.message || 'An error occurred while querying data',
+            timestamp: new Date().toISOString()
+        });
+    }
+}
+
+/**
+ * AI Co-Pilot - Refine generated code based on user instructions
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+async function refineGeneratedCode(req, res) {
+    try {
+        // Validate request body
+        const { code, instruction } = req.body;
+
+        if (!code || typeof code !== 'string') {
+            return res.status(400).json({
+                success: false,
+                error: 'Code field is required and must be a string'
+            });
+        }
+
+        if (!instruction || typeof instruction !== 'string') {
+            return res.status(400).json({
+                success: false,
+                error: 'Instruction field is required and must be a string'
+            });
+        }
+
+        console.log(`Processing code refinement for user: ${req.user.email}`);
+        console.log(`Instruction: ${instruction}`);
+        console.log(`Code length: ${code.length} characters`);
+
+        // Call Gemini AI to refine the code
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const prompt = `You are an expert AI Code Refinement Assistant. Your task is to take a block of existing code and modify it based on a user's instruction. You must only return the complete, new block of code and nothing else. Do not add any explanations or markdown formatting.
+
+Here is the code you need to modify:
+\`\`\`javascript
+${code}
+\`\`\`
+
+Here is the user's instruction:
+"${instruction}"
+
+Now, generate and return the complete, fully updated code block that incorporates the user's change.`;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const refinedCode = response.text().trim();
+
+        // Clean up any markdown formatting if present
+        let cleanedCode = refinedCode;
+        cleanedCode = cleanedCode.replace(/^```javascript\s*/, '').replace(/\s*```$/, '');
+        cleanedCode = cleanedCode.replace(/^```\s*/, '').replace(/\s*```$/, '');
+
+        console.log('Code refinement completed successfully');
+
+        // Return the refined code
+        res.status(200).json({
+            success: true,
+            timestamp: new Date().toISOString(),
+            user: req.user.email,
+            instruction: instruction,
+            originalCodeLength: code.length,
+            refinedCodeLength: cleanedCode.length,
+            refinedCode: cleanedCode
+        });
+
+    } catch (error) {
+        console.error('Code refinement error:', error);
+
+        res.status(500).json({
+            success: false,
+            error: error.message || 'An error occurred while refining code',
+            timestamp: new Date().toISOString()
+        });
+    }
+}
+
 module.exports = {
     modernizeLegacyFiles,
     parseCopybook,
     callGeminiAPI,
-    getInsightEngineAnalysis
+    getInsightEngineAnalysis,
+    queryData,
+    refineGeneratedCode
 };

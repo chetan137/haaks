@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { modernizeLegacyFiles } = require('../controllers/modernizeController');
+const { modernizeLegacyFiles, queryData, refineGeneratedCode } = require('../controllers/modernizeController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
@@ -38,6 +38,30 @@ router.post(
         req.user = { email: 'demo@example.com', _id: 'demo-user' };
         modernizeLegacyFiles(req, res, next);
     }
+);
+
+/**
+ * @route   POST /api/v1/query
+ * @desc    Talk to your Data - Convert natural language questions to MongoDB queries and execute them
+ * @access  Private (requires authentication)
+ * @body    JSON with question field: { "question": "Show me all customers from California" }
+ */
+router.post(
+    '/query',
+    authenticateToken,
+    queryData
+);
+
+/**
+ * @route   POST /api/v1/refine
+ * @desc    AI Co-Pilot - Refine generated code based on user instructions
+ * @access  Private (requires authentication)
+ * @body    JSON with code and instruction fields: { "code": "...", "instruction": "add error handling" }
+ */
+router.post(
+    '/refine',
+    authenticateToken,
+    refineGeneratedCode
 );
 
 module.exports = router;
