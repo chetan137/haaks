@@ -1,4 +1,4 @@
- import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AS400ModernizationAssistant = () => {
@@ -378,120 +378,386 @@ ${assets.microservices}
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 relative overflow-hidden">
-      {/* Background gradients */}
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
-      <div className="fixed inset-0 bg-gradient-to-r from-orange-500/5 via-transparent to-yellow-500/5"></div>
+    <>
+      <style jsx>{`
+        .as400-container {
+          min-height: 100vh;
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #374151 50%, #1e293b 75%, #0f172a 100%);
+          position: relative;
+          overflow-x: hidden;
+        }
 
-      {/* Hidden file inputs */}
-      <input
-        ref={copybookInputRef}
-        type="file"
-        accept=".cpy"
-        onChange={handleCopybookSelect}
-        className="hidden"
-      />
-      <input
-        ref={dataInputRef}
-        type="file"
-        accept=".dat"
-        onChange={handleDataSelect}
-        className="hidden"
-      />
+        .bg-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background:
+            radial-gradient(ellipse at top left, rgba(255, 140, 0, 0.1), transparent 50%),
+            radial-gradient(ellipse at bottom right, rgba(255, 215, 0, 0.08), transparent 50%),
+            radial-gradient(ellipse at center, rgba(255, 140, 0, 0.05), transparent 70%);
+          pointer-events: none;
+          z-index: 1;
+        }
 
-      {/* Main content */}
-      <div className="relative z-10 min-h-screen">
-        {/* Header */}
-        <motion.header
-          className="py-8 px-4"
-          initial="initial"
-          animate="animate"
-          variants={fadeInUp}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="max-w-4xl mx-auto text-center">
+        .content-wrapper {
+          position: relative;
+          z-index: 10;
+          width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 0 1rem;
+        }
+
+        .glass-card {
+          background: rgba(15, 23, 42, 0.6);
+          backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 140, 0, 0.2);
+          border-radius: 1.5rem;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-card-light {
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 140, 0, 0.15);
+          border-radius: 1rem;
+        }
+
+        .gradient-text {
+          background: linear-gradient(135deg, #ff8c00 0%, #ffd700 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .btn-primary {
+          background: linear-gradient(135deg, #ff8c00 0%, #ffd700 100%);
+          color: #000;
+          border: none;
+          font-weight: 700;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 20px rgba(255, 140, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 30px rgba(255, 140, 0, 0.4);
+        }
+
+        .btn-primary:disabled {
+          background: #64748b;
+          color: #94a3b8;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .btn-secondary {
+          background: transparent;
+          color: #e2e8f0;
+          border: 2px solid rgba(255, 140, 0, 0.4);
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+          background: rgba(255, 140, 0, 0.1);
+          border-color: rgba(255, 140, 0, 0.6);
+          color: #fff;
+        }
+
+        .tab-active {
+          background: linear-gradient(135deg, #ff8c00 0%, #ffd700 100%);
+          color: #000;
+          font-weight: 700;
+        }
+
+        .tab-inactive {
+          background: transparent;
+          color: #cbd5e1;
+          border: 1px solid rgba(255, 140, 0, 0.3);
+        }
+
+        .tab-inactive:hover {
+          background: rgba(255, 140, 0, 0.1);
+          color: #fff;
+        }
+
+        .code-block {
+          background: rgba(15, 23, 42, 0.8);
+          border: 1px solid rgba(255, 140, 0, 0.2);
+          border-radius: 0.75rem;
+          padding: 1.5rem;
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+          font-size: 0.875rem;
+          line-height: 1.6;
+          overflow-x: auto;
+        }
+
+        .service-node {
+          background: rgba(15, 23, 42, 0.7);
+          backdrop-filter: blur(8px);
+          border: 2px solid;
+          border-radius: 1rem;
+          padding: 1rem;
+          min-width: 120px;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+        }
+
+        .service-node:hover {
+          transform: scale(1.05);
+          box-shadow: 0 8px 25px rgba(255, 140, 0, 0.3);
+        }
+
+        .pulse {
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        .rotate {
+          animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        .floating {
+          animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+
+        .section-spacing {
+          margin-bottom: 4rem;
+        }
+
+        .center-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          width: 100%;
+        }
+
+        .grid-2 {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 2rem;
+          width: 100%;
+        }
+
+        .grid-3 {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 1.5rem;
+          width: 100%;
+        }
+
+        @media (max-width: 768px) {
+          .content-wrapper {
+            padding: 0 0.5rem;
+          }
+
+          .grid-2,
+          .grid-3 {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+
+          .section-spacing {
+            margin-bottom: 2rem;
+          }
+        }
+      `}</style>
+
+      <div className="as400-container">
+        <div className="bg-overlay"></div>
+
+        {/* Hidden file inputs */}
+        <input
+          ref={copybookInputRef}
+          type="file"
+          accept=".cpy"
+          onChange={handleCopybookSelect}
+          style={{ display: 'none' }}
+        />
+        <input
+          ref={dataInputRef}
+          type="file"
+          accept=".dat"
+          onChange={handleDataSelect}
+          style={{ display: 'none' }}
+        />
+
+        <div className="content-wrapper">
+          {/* Header Section */}
+          <motion.header
+            className="center-container section-spacing"
+            initial="initial"
+            animate="animate"
+            variants={fadeInUp}
+            transition={{ duration: 0.6 }}
+            style={{ paddingTop: '3rem', paddingBottom: '2rem' }}
+          >
             <motion.h1
-              className="text-5xl font-bold mb-4"
+              className="gradient-text"
               variants={slideIn}
               transition={{ duration: 0.8, delay: 0.2 }}
+              style={{
+                fontSize: 'clamp(3rem, 8vw, 6rem)',
+                fontWeight: 900,
+                marginBottom: '1rem',
+                lineHeight: 1
+              }}
             >
-              <span className="bg-gradient-to-r from-orange-500 to-yellow-500 bg-clip-text text-transparent">
-                AS/400
-              </span>
-              <span className="text-white"> Legacy Modernization</span>
+              AS/400
             </motion.h1>
-            <motion.p
-              className="text-xl text-gray-300 max-w-2xl mx-auto"
+            <motion.h2
+              style={{
+                fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
+                fontWeight: 700,
+                color: '#fff',
+                marginBottom: '1.5rem'
+              }}
               variants={fadeInUp}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
+              Legacy Modernization
+            </motion.h2>
+            <motion.div
+              style={{
+                width: '100px',
+                height: '4px',
+                background: 'linear-gradient(90deg, #ff8c00, #ffd700)',
+                borderRadius: '2px',
+                marginBottom: '2rem'
+              }}
+              initial={{ width: 0 }}
+              animate={{ width: 100 }}
+              transition={{ delay: 0.8, duration: 1 }}
+            />
+            <motion.p
+              style={{
+                fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+                color: '#cbd5e1',
+                maxWidth: '600px',
+                lineHeight: 1.6
+              }}
+              variants={fadeInUp}
+              transition={{ duration: 0.6, delay: 0.6 }}
+            >
               Transform your COBOL legacy systems into modern web applications with AI-powered analysis
             </motion.p>
-          </div>
-        </motion.header>
+          </motion.header>
 
-        {/* Upload Section */}
-        <motion.section
-          className="py-12 px-4"
-          variants={fadeInUp}
-          initial="initial"
-          animate="animate"
-          transition={{ duration: 0.6, delay: 0.6 }}
-        >
-          <div className="max-w-4xl mx-auto">
-            <motion.div
-              className="backdrop-blur-md bg-gray-800/60 border border-orange-500/20 rounded-2xl p-8"
-              whileHover={{ scale: 1.01 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <motion.h2
-                className="text-3xl font-bold text-center mb-8"
-                variants={scaleIn}
-              >
-                🚀 <span className="bg-gradient-to-r from-orange-500 to-yellow-500 bg-clip-text text-transparent">
-                  Upload Your Legacy Files
-                </span>
-              </motion.h2>
+          {/* Upload Section */}
+          <motion.section
+            className="section-spacing"
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            transition={{ duration: 0.6, delay: 0.8 }}
+          >
+            <div className="glass-card" style={{ padding: '3rem' }}>
+              <div className="center-container" style={{ marginBottom: '3rem' }}>
+                <motion.h2
+                  className="gradient-text"
+                  variants={scaleIn}
+                  style={{
+                    fontSize: 'clamp(2rem, 5vw, 3rem)',
+                    fontWeight: 800,
+                    marginBottom: '1rem'
+                  }}
+                >
+                  🚀 Upload Your Legacy Files
+                </motion.h2>
+                <p style={{ color: '#94a3b8', fontSize: '1.1rem' }}>
+                  Begin your modernization journey by uploading your legacy system files
+                </p>
+              </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="grid-2" style={{ marginBottom: '3rem' }}>
                 {/* Copybook File */}
                 <motion.div
-                  className="backdrop-blur-md bg-gray-800/60 border border-orange-500/20 rounded-xl p-6"
+                  className="glass-card-light"
                   whileHover={{ y: -5, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 300 }}
+                  style={{ padding: '2rem' }}
                 >
-                  <div className="text-center">
+                  <div className="center-container">
                     <motion.div
-                      className="text-4xl mb-4"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      style={{ fontSize: '4rem', marginBottom: '1rem' }}
+                      className="floating"
                     >
                       📋
                     </motion.div>
-                    <h3 className="text-xl font-semibold mb-2">COBOL Copybook</h3>
-                    <p className="text-gray-400 mb-4">Upload your .cpy file containing the data structure definitions</p>
+                    <h3 style={{
+                      fontSize: '1.5rem',
+                      fontWeight: 700,
+                      color: '#fff',
+                      marginBottom: '0.5rem'
+                    }}>
+                      COBOL Copybook
+                    </h3>
+                    <p style={{
+                      color: '#94a3b8',
+                      marginBottom: '2rem',
+                      lineHeight: 1.5
+                    }}>
+                      Upload your <span style={{ color: '#ff8c00', fontWeight: 600 }}>.cpy</span> file containing the data structure definitions
+                    </p>
+
                     <motion.button
                       onClick={() => copybookInputRef.current?.click()}
-                      className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-                        copybookFile
-                          ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-black shadow-lg shadow-orange-500/30'
-                          : 'bg-transparent border-2 border-orange-500/60 text-gray-300 hover:bg-orange-500/10 hover:border-orange-500/80'
-                      }`}
+                      className={copybookFile ? 'btn-primary' : 'btn-secondary'}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '0.75rem',
+                        fontSize: '1rem',
+                        width: '100%',
+                        maxWidth: '250px'
+                      }}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
                       {copybookFile ? `✅ ${copybookFile.name}` : 'Select Copybook (.cpy)'}
                     </motion.button>
+
                     <AnimatePresence>
                       {copybookFile && (
                         <motion.div
-                          className="mt-2 text-sm text-green-400"
+                          style={{
+                            marginTop: '1rem',
+                            padding: '0.75rem',
+                            background: 'rgba(34, 197, 94, 0.1)',
+                            border: '1px solid rgba(34, 197, 94, 0.3)',
+                            borderRadius: '0.5rem',
+                            color: '#4ade80'
+                          }}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                         >
-                          Selected: {copybookFile.name} ({(copybookFile.size / 1024).toFixed(1)} KB)
+                          <div style={{ fontWeight: 600 }}>✅ File Selected Successfully</div>
+                          <div style={{ fontSize: '0.875rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                            {copybookFile.name} • {(copybookFile.size / 1024).toFixed(1)} KB
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -500,42 +766,71 @@ ${assets.microservices}
 
                 {/* Data File */}
                 <motion.div
-                  className="backdrop-blur-md bg-gray-800/60 border border-orange-500/20 rounded-xl p-6"
+                  className="glass-card-light"
                   whileHover={{ y: -5, scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 300 }}
+                  style={{ padding: '2rem' }}
                 >
-                  <div className="text-center">
+                  <div className="center-container">
                     <motion.div
-                      className="text-4xl mb-4"
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
+                      style={{ fontSize: '4rem', marginBottom: '1rem' }}
+                      className="floating"
+                      transition={{ delay: 0.5 }}
                     >
                       💾
                     </motion.div>
-                    <h3 className="text-xl font-semibold mb-2">Legacy Data</h3>
-                    <p className="text-gray-400 mb-4">Upload your .dat file containing the actual data records</p>
+                    <h3 style={{
+                      fontSize: '1.5rem',
+                      fontWeight: 700,
+                      color: '#fff',
+                      marginBottom: '0.5rem'
+                    }}>
+                      Legacy Data
+                    </h3>
+                    <p style={{
+                      color: '#94a3b8',
+                      marginBottom: '2rem',
+                      lineHeight: 1.5
+                    }}>
+                      Upload your <span style={{ color: '#ff8c00', fontWeight: 600 }}>.dat</span> file containing the actual data records
+                    </p>
+
                     <motion.button
                       onClick={() => dataInputRef.current?.click()}
-                      className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-                        dataFile
-                          ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-black shadow-lg shadow-orange-500/30'
-                          : 'bg-transparent border-2 border-orange-500/60 text-gray-300 hover:bg-orange-500/10 hover:border-orange-500/80'
-                      }`}
+                      className={dataFile ? 'btn-primary' : 'btn-secondary'}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '0.75rem',
+                        fontSize: '1rem',
+                        width: '100%',
+                        maxWidth: '250px'
+                      }}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
                       {dataFile ? `✅ ${dataFile.name}` : 'Select Data (.dat)'}
                     </motion.button>
+
                     <AnimatePresence>
                       {dataFile && (
                         <motion.div
-                          className="mt-2 text-sm text-green-400"
+                          style={{
+                            marginTop: '1rem',
+                            padding: '0.75rem',
+                            background: 'rgba(34, 197, 94, 0.1)',
+                            border: '1px solid rgba(34, 197, 94, 0.3)',
+                            borderRadius: '0.5rem',
+                            color: '#4ade80'
+                          }}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
                         >
-                          Selected: {dataFile.name} ({(dataFile.size / 1024).toFixed(1)} KB)
+                          <div style={{ fontWeight: 600 }}>✅ File Selected Successfully</div>
+                          <div style={{ fontSize: '0.875rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                            {dataFile.name} • {(dataFile.size / 1024).toFixed(1)} KB
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -544,40 +839,62 @@ ${assets.microservices}
               </div>
 
               {/* Action Button */}
-              <div className="text-center">
+              <div className="center-container">
                 <motion.button
                   onClick={handleModernize}
                   disabled={!copybookFile || !dataFile || isLoading}
-                  className={`px-12 py-4 rounded-xl text-xl font-bold transition-all duration-300 ${
-                    copybookFile && dataFile && !isLoading
-                      ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-black shadow-lg shadow-orange-500/30 hover:shadow-orange-500/40'
-                      : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  }`}
+                  className="btn-primary"
+                  style={{
+                    padding: '1rem 3rem',
+                    borderRadius: '1rem',
+                    fontSize: '1.25rem',
+                    fontWeight: 800
+                  }}
                   whileHover={copybookFile && dataFile && !isLoading ? { scale: 1.05, y: -2 } : {}}
                   whileTap={copybookFile && dataFile && !isLoading ? { scale: 0.95 } : {}}
-                  animate={copybookFile && dataFile && !isLoading ? {
-                    boxShadow: ["0 0 20px rgba(255, 140, 0, 0.3)", "0 0 40px rgba(255, 140, 0, 0.6)", "0 0 20px rgba(255, 140, 0, 0.3)"]
-                  } : {}}
-                  transition={{ duration: 2, repeat: Infinity }}
                 >
-                  {isLoading ? '🔄 Processing...' : '🔥 Ignite Modernization'}
+                  {isLoading ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span className="rotate">🔄</span>
+                      Processing...
+                    </span>
+                  ) : (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      🔥 Ignite Modernization ✨
+                    </span>
+                  )}
                 </motion.button>
 
-                {/* Loading Spinner */}
+                {/* Loading State */}
                 <AnimatePresence>
                   {isLoading && (
                     <motion.div
-                      className="mt-8 flex items-center justify-center"
+                      style={{ marginTop: '2rem', textAlign: 'center' }}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                     >
-                      <motion.div
-                        className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      />
-                      <span className="ml-3 text-lg">Analyzing and modernizing your legacy files...</span>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '1rem',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <div className="rotate" style={{
+                          width: '32px',
+                          height: '32px',
+                          border: '3px solid rgba(255, 140, 0, 0.3)',
+                          borderTop: '3px solid #ff8c00',
+                          borderRadius: '50%'
+                        }}></div>
+                        <span style={{ fontSize: '1.1rem', color: '#ff8c00', fontWeight: 600 }}>
+                          Analyzing and modernizing your legacy files...
+                        </span>
+                      </div>
+                      <p style={{ color: '#64748b', fontSize: '0.875rem' }}>
+                        Please wait while we transform your legacy systems
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -586,105 +903,169 @@ ${assets.microservices}
                 <AnimatePresence>
                   {error && (
                     <motion.div
-                      className="mt-4 p-4 bg-red-900/50 border border-red-500 rounded-lg text-red-200"
-                      initial={{ opacity: 0, scale: 0.9, x: -10 }}
-                      animate={{
-                        opacity: 1,
-                        scale: 1,
-                        x: [0, 5, -5, 0],
-                        transition: { x: { duration: 0.5 } }
+                      style={{
+                        marginTop: '1.5rem',
+                        padding: '1rem',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        borderRadius: '0.75rem',
+                        color: '#fca5a5'
                       }}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                     >
-                      {error}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span>⚠️</span>
+                        <span style={{ fontWeight: 600 }}>{error}</span>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            </motion.div>
-          </div>
-        </motion.section>
+            </div>
+          </motion.section>
 
-        {/* Results Section */}
-        <AnimatePresence>
-          {results && (
-            <motion.section
-              className="py-12 px-4"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="max-w-6xl mx-auto">
-                <motion.div
-                  className="backdrop-blur-md bg-gray-800/60 border border-orange-500/20 rounded-2xl p-8"
-                  layoutId="results-container"
-                >
-                  <motion.h2
-                    className="text-3xl font-bold text-center mb-8"
-                    variants={scaleIn}
-                  >
-                    ✨ <span className="bg-gradient-to-r from-orange-500 to-yellow-500 bg-clip-text text-transparent">
-                      Modernization Results
-                    </span>
-                  </motion.h2>
+          {/* Results Section */}
+          <AnimatePresence>
+            {results && (
+              <motion.section
+                className="section-spacing"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="glass-card" style={{ padding: '3rem' }}>
+                  <div className="center-container" style={{ marginBottom: '3rem' }}>
+                    <motion.h2
+                      className="gradient-text"
+                      variants={scaleIn}
+                      style={{
+                        fontSize: 'clamp(2rem, 5vw, 3rem)',
+                        fontWeight: 800,
+                        marginBottom: '1rem'
+                      }}
+                    >
+                      ✨ Modernization Results
+                    </motion.h2>
+                    <motion.div
+                      style={{
+                        width: '120px',
+                        height: '4px',
+                        background: 'linear-gradient(90deg, #ff8c00, #ffd700)',
+                        borderRadius: '2px'
+                      }}
+                      initial={{ width: 0 }}
+                      animate={{ width: 120 }}
+                      transition={{ delay: 0.3, duration: 1 }}
+                    />
+                  </div>
 
                   {/* Insight Engine */}
                   <motion.div
-                    className="backdrop-blur-md bg-gray-800/60 border-2 border-amber-400 rounded-xl p-6 mb-8"
+                    className="glass-card-light"
+                    style={{
+                      padding: '2rem',
+                      marginBottom: '3rem',
+                      border: '2px solid rgba(251, 191, 36, 0.4)'
+                    }}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <h3 className="text-2xl font-bold text-center mb-4 bg-gradient-to-r from-orange-500 to-yellow-500 bg-clip-text text-transparent">
-                      The Insight Engine
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                      <motion.div whileHover={{ scale: 1.05 }}>
-                        <p className="text-sm font-semibold text-gray-400">MANUAL EFFORT</p>
-                        <p className="text-xl font-bold">{results.modernizationAssets.insightEngine.manualEffort.hours}</p>
-                        <p className="text-sm text-gray-400">{results.modernizationAssets.insightEngine.manualEffort.timeline}</p>
+                    <div className="center-container" style={{ marginBottom: '2rem' }}>
+                      <h3 className="gradient-text" style={{
+                        fontSize: '2rem',
+                        fontWeight: 800,
+                        marginBottom: '0.5rem'
+                      }}>
+                        🧠 The Insight Engine
+                      </h3>
+                    </div>
+
+                    <div className="grid-3" style={{ marginBottom: '1.5rem' }}>
+                      <motion.div
+                        className="glass-card-light"
+                        style={{ padding: '1.5rem', textAlign: 'center' }}
+                        whileHover={{ scale: 1.02 }}
+                      >
+                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', fontWeight: 600, marginBottom: '0.5rem' }}>
+                          MANUAL EFFORT
+                        </p>
+                        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.25rem' }}>
+                          {results.modernizationAssets.insightEngine.manualEffort.hours}
+                        </p>
+                        <p style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                          {results.modernizationAssets.insightEngine.manualEffort.timeline}
+                        </p>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }}>
-                        <p className="text-sm font-semibold text-gray-400">ESTIMATED COST (USD)</p>
-                        <p className="text-3xl font-bold text-red-500">{results.modernizationAssets.insightEngine.manualEffort.costUSD}</p>
+
+                      <motion.div
+                        className="glass-card-light"
+                        style={{ padding: '1.5rem', textAlign: 'center' }}
+                        whileHover={{ scale: 1.02 }}
+                      >
+                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', fontWeight: 600, marginBottom: '0.5rem' }}>
+                          ESTIMATED COST (USD)
+                        </p>
+                        <p style={{ fontSize: '2rem', fontWeight: 800, color: '#ef4444', marginBottom: '0.25rem' }}>
+                          {results.modernizationAssets.insightEngine.manualEffort.costUSD}
+                        </p>
                       </motion.div>
-                      <motion.div whileHover={{ scale: 1.05 }}>
-                        <p className="text-sm font-semibold text-gray-400">SAVINGS w/ OUR TOOL</p>
-                        <p className="text-3xl font-bold text-green-500"> 85%</p>
+
+                      <motion.div
+                        className="glass-card-light"
+                        style={{ padding: '1.5rem', textAlign: 'center' }}
+                        whileHover={{ scale: 1.02 }}
+                      >
+                        <p style={{ fontSize: '0.875rem', color: '#94a3b8', fontWeight: 600, marginBottom: '0.5rem' }}>
+                          SAVINGS w/ OUR TOOL
+                        </p>
+                        <p style={{ fontSize: '2rem', fontWeight: 800, color: '#22c55e', marginBottom: '0.25rem' }}>
+                          85%
+                        </p>
                       </motion.div>
                     </div>
-                    <p className="text-center mt-4 text-sm text-gray-400">
-                      {results.modernizationAssets.insightEngine.summary}
-                    </p>
+
+                    <div className="center-container">
+                      <p style={{ color: '#94a3b8', lineHeight: 1.6, maxWidth: '600px' }}>
+                        {results.modernizationAssets.insightEngine.summary}
+                      </p>
+                    </div>
                   </motion.div>
 
                   {/* Tab Navigation */}
-                  <motion.div
-                    className="flex flex-wrap justify-center gap-4 mb-8"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    {tabs.map((tab, index) => (
-                      <motion.button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
-                          activeTab === tab.id
-                            ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-black'
-                            : 'bg-transparent border border-orange-500/30 text-gray-300 hover:bg-orange-500/10'
-                        }`}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 + index * 0.1 }}
-                      >
-                        {tab.name}
-                      </motion.button>
-                    ))}
-                  </motion.div>
+                  <div className="center-container" style={{ marginBottom: '2rem' }}>
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      justifyContent: 'center',
+                      gap: '1rem'
+                    }}>
+                      {tabs.map((tab, index) => (
+                        <motion.button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id)}
+                          className={activeTab === tab.id ? 'tab-active' : 'tab-inactive'}
+                          style={{
+                            padding: '0.75rem 1.5rem',
+                            borderRadius: '0.75rem',
+                            fontSize: '1rem',
+                            fontWeight: 600,
+                            transition: 'all 0.3s ease'
+                          }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 + index * 0.1 }}
+                        >
+                          {tab.name}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
 
                   {/* Tab Content */}
                   <AnimatePresence mode="wait">
@@ -698,9 +1079,24 @@ ${assets.microservices}
                       {/* Database Schema Tab */}
                       {activeTab === 'db-schema' && (
                         <div>
-                          <h3 className="text-xl font-semibold mb-4">PostgreSQL Database Schema</h3>
-                          <div className="backdrop-blur-md bg-gray-900/60 rounded-lg p-4 overflow-x-auto">
-                            <pre className="text-sm text-green-400 whitespace-pre-wrap">
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <h3 style={{
+                              fontSize: '1.5rem',
+                              fontWeight: 700,
+                              color: '#fff',
+                              marginBottom: '0.5rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}>
+                              🗄️ PostgreSQL Database Schema
+                            </h3>
+                            <p style={{ color: '#94a3b8' }}>
+                              Auto-generated database structure for your legacy data
+                            </p>
+                          </div>
+                          <div className="code-block" style={{ color: '#4ade80' }}>
+                            <pre style={{ margin: 0 }}>
                               <code>{results.modernizationAssets.dbSchema}</code>
                             </pre>
                           </div>
@@ -710,9 +1106,24 @@ ${assets.microservices}
                       {/* REST API Tab */}
                       {activeTab === 'rest-api' && (
                         <div>
-                          <h3 className="text-xl font-semibold mb-4">Node.js Express REST API</h3>
-                          <div className="backdrop-blur-md bg-gray-900/60 rounded-lg p-4 overflow-x-auto">
-                            <pre className="text-sm text-blue-400 whitespace-pre-wrap">
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <h3 style={{
+                              fontSize: '1.5rem',
+                              fontWeight: 700,
+                              color: '#fff',
+                              marginBottom: '0.5rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}>
+                              🔗 Node.js Express REST API
+                            </h3>
+                            <p style={{ color: '#94a3b8' }}>
+                              Modern API endpoints for your legacy data
+                            </p>
+                          </div>
+                          <div className="code-block" style={{ color: '#60a5fa' }}>
+                            <pre style={{ margin: 0 }}>
                               <code>{results.modernizationAssets.restApi}</code>
                             </pre>
                           </div>
@@ -722,9 +1133,24 @@ ${assets.microservices}
                       {/* JSON Data Tab */}
                       {activeTab === 'json-data' && (
                         <div>
-                          <h3 className="text-xl font-semibold mb-4">Converted JSON Data</h3>
-                          <div className="backdrop-blur-md bg-gray-900/60 rounded-lg p-4 overflow-x-auto">
-                            <pre className="text-sm text-yellow-400 whitespace-pre-wrap">
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <h3 style={{
+                              fontSize: '1.5rem',
+                              fontWeight: 700,
+                              color: '#fff',
+                              marginBottom: '0.5rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}>
+                              📊 Converted JSON Data
+                            </h3>
+                            <p style={{ color: '#94a3b8' }}>
+                              Your legacy data transformed to modern format
+                            </p>
+                          </div>
+                          <div className="code-block" style={{ color: '#fbbf24' }}>
+                            <pre style={{ margin: 0 }}>
                               <code>{JSON.stringify(results.modernizationAssets.jsonData, null, 2)}</code>
                             </pre>
                           </div>
@@ -734,18 +1160,40 @@ ${assets.microservices}
                       {/* Microservices Tab */}
                       {activeTab === 'microservices' && (
                         <div>
-                          <h3 className="text-xl font-semibold mb-4">🏗️ Microservices Architecture</h3>
+                          <div style={{ marginBottom: '1.5rem' }}>
+                            <h3 style={{
+                              fontSize: '1.5rem',
+                              fontWeight: 700,
+                              color: '#fff',
+                              marginBottom: '0.5rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem'
+                            }}>
+                              🏗️ Microservices Architecture
+                            </h3>
+                            <p style={{ color: '#94a3b8' }}>
+                              Modern, scalable system architecture design
+                            </p>
+                          </div>
 
                           {/* View Toggle */}
-                          <div className="flex justify-center mb-6">
-                            <div className="backdrop-blur-md bg-gray-800/60 rounded-lg p-1 flex">
+                          <div className="center-container" style={{ marginBottom: '2rem' }}>
+                            <div className="glass-card-light" style={{
+                              padding: '0.5rem',
+                              display: 'inline-flex',
+                              gap: '0.5rem'
+                            }}>
                               <motion.button
                                 onClick={() => setMicroservicesView('diagram')}
-                                className={`px-6 py-2 rounded-md font-medium transition-all ${
-                                  microservicesView === 'diagram'
-                                    ? 'bg-orange-500 text-black'
-                                    : 'text-gray-300 hover:text-white'
-                                }`}
+                                className={microservicesView === 'diagram' ? 'tab-active' : 'tab-inactive'}
+                                style={{
+                                  padding: '0.5rem 1rem',
+                                  borderRadius: '0.5rem',
+                                  fontSize: '0.875rem',
+                                  fontWeight: 600,
+                                  border: 'none'
+                                }}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                               >
@@ -753,11 +1201,14 @@ ${assets.microservices}
                               </motion.button>
                               <motion.button
                                 onClick={() => setMicroservicesView('code')}
-                                className={`px-6 py-2 rounded-md font-medium transition-all ${
-                                  microservicesView === 'code'
-                                    ? 'bg-orange-500 text-black'
-                                    : 'text-gray-300 hover:text-white'
-                                }`}
+                                className={microservicesView === 'code' ? 'tab-active' : 'tab-inactive'}
+                                style={{
+                                  padding: '0.5rem 1rem',
+                                  borderRadius: '0.5rem',
+                                  fontSize: '0.875rem',
+                                  fontWeight: 600,
+                                  border: 'none'
+                                }}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                               >
@@ -773,14 +1224,18 @@ ${assets.microservices}
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                className="mb-6"
+                                transition={{ duration: 0.5 }}
                               >
-                                <div className="backdrop-blur-md bg-gray-900/60 rounded-lg p-6">
-                                  <div className="text-center mb-4">
-                                    <h4 className="text-lg font-semibold bg-gradient-to-r from-orange-500 to-yellow-500 bg-clip-text text-transparent">
+                                <div className="glass-card-light" style={{ padding: '2rem' }}>
+                                  <div className="center-container" style={{ marginBottom: '1.5rem' }}>
+                                    <h4 className="gradient-text" style={{
+                                      fontSize: '1.25rem',
+                                      fontWeight: 700,
+                                      marginBottom: '0.5rem'
+                                    }}>
                                       Interactive Microservices Architecture
                                     </h4>
-                                    <p className="text-gray-400 text-sm mt-1">
+                                    <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>
                                       🖱️ Click services for details • ✨ Hover for effects
                                     </p>
                                   </div>
@@ -788,71 +1243,70 @@ ${assets.microservices}
                                   {/* Diagram Container */}
                                   <div
                                     ref={diagramContainerRef}
-                                    className="relative w-full h-96 border border-gray-700 rounded-lg bg-gray-900 overflow-hidden"
                                     style={{
-                                      background: 'radial-gradient(circle at 50% 50%, rgba(255, 140, 0, 0.05) 0%, transparent 70%)'
+                                      position: 'relative',
+                                      width: '100%',
+                                      height: '400px',
+                                      background: 'rgba(15, 23, 42, 0.8)',
+                                      border: '2px solid rgba(255, 140, 0, 0.2)',
+                                      borderRadius: '1rem',
+                                      overflow: 'hidden',
+                                      marginBottom: '1.5rem'
                                     }}
                                   >
                                     {/* Service nodes */}
-                                    {microservicesData.map((service) => (
+                                    {microservicesData.map((service, index) => (
                                       <motion.div
                                         key={service.id}
-                                        className="absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                                        className="service-node"
                                         style={{
+                                          position: 'absolute',
                                           left: `${service.position.x}%`,
-                                          top: `${service.position.y}%`
+                                          top: `${service.position.y}%`,
+                                          transform: 'translate(-50%, -50%)',
+                                          borderColor: service.color,
+                                          background: `linear-gradient(135deg, ${service.color}20, ${service.color}10)`
                                         }}
-                                        whileHover={{
-                                          scale: 1.1,
-                                          zIndex: 10,
-                                          filter: 'brightness(1.2)'
-                                        }}
-                                        whileTap={{ scale: 0.95 }}
                                         onClick={() => handleServiceClick(service)}
                                         initial={{ opacity: 0, scale: 0 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{
-                                          delay: microservicesData.indexOf(service) * 0.1,
+                                          delay: index * 0.1,
                                           type: "spring",
                                           stiffness: 300
                                         }}
                                       >
-                                        <div
-                                          className="relative p-4 rounded-xl border-2 shadow-lg min-w-[120px] backdrop-blur-sm"
-                                          style={{
-                                            background: `linear-gradient(135deg, ${service.color}15, ${service.color}25)`,
-                                            borderColor: service.color
-                                          }}
-                                        >
-                                          <div className="text-center">
-                                            <div className="text-xs font-bold text-white mb-1">
-                                              {getServiceIcon(service.type)} {service.name}
-                                            </div>
-                                            <div className="text-xs text-gray-300">
-                                              {service.type}
-                                            </div>
-                                          </div>
-                                          <motion.div
-                                            className="absolute -top-1 -right-1 w-4 h-4 rounded-full"
-                                            style={{
-                                              background: service.color,
-                                              boxShadow: `0 0 10px ${service.color}50`
-                                            }}
-                                            animate={{
-                                              scale: [1, 1.2, 1],
-                                              opacity: [1, 0.7, 1]
-                                            }}
-                                            transition={{
-                                              duration: 2,
-                                              repeat: Infinity
-                                            }}
-                                          />
+                                        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#fff', marginBottom: '0.25rem' }}>
+                                          <span style={{ marginRight: '0.25rem' }}>{getServiceIcon(service.type)}</span>
+                                          {service.name}
                                         </div>
+                                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>
+                                          {service.type}
+                                        </div>
+                                        <div
+                                          className="pulse"
+                                          style={{
+                                            position: 'absolute',
+                                            top: '-4px',
+                                            right: '-4px',
+                                            width: '12px',
+                                            height: '12px',
+                                            borderRadius: '50%',
+                                            background: service.color
+                                          }}
+                                        />
                                       </motion.div>
                                     ))}
 
                                     {/* Connection lines */}
-                                    <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                                    <svg style={{
+                                      position: 'absolute',
+                                      top: 0,
+                                      left: 0,
+                                      width: '100%',
+                                      height: '100%',
+                                      pointerEvents: 'none'
+                                    }}>
                                       <defs>
                                         <marker
                                           id="arrowhead"
@@ -862,11 +1316,11 @@ ${assets.microservices}
                                           refY="3.5"
                                           orient="auto"
                                         >
-                                          <polygon points="0 0, 10 3.5, 0 7" fill="#FF8C00" />
+                                          <polygon points="0 0, 10 3.5, 0 7" fill="#ff8c00" />
                                         </marker>
                                         <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                          <stop offset="0%" style={{ stopColor: '#FF8C00', stopOpacity: 0.8 }} />
-                                          <stop offset="100%" style={{ stopColor: '#FFD700', stopOpacity: 0.8 }} />
+                                          <stop offset="0%" style={{ stopColor: '#ff8c00', stopOpacity: 0.8 }} />
+                                          <stop offset="100%" style={{ stopColor: '#ffd700', stopOpacity: 0.8 }} />
                                         </linearGradient>
                                       </defs>
                                       {microservicesData.map((service) =>
@@ -900,71 +1354,120 @@ ${assets.microservices}
                                   <AnimatePresence>
                                     {serviceDetails && (
                                       <motion.div
-                                        className="mt-6 p-4 bg-gray-700 rounded-lg border border-orange-500/30"
+                                        className="glass-card-light"
+                                        style={{ padding: '1.5rem' }}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -20 }}
                                       >
-                                        <div className="flex items-center justify-between mb-3">
-                                          <h5 className="font-semibold text-orange-400">
-                                            {getServiceIcon(serviceDetails.type)} {serviceDetails.name}
+                                        <div style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'space-between',
+                                          marginBottom: '1rem'
+                                        }}>
+                                          <h5 style={{
+                                            fontSize: '1.25rem',
+                                            fontWeight: 700,
+                                            color: '#ff8c00',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem'
+                                          }}>
+                                            <span>{getServiceIcon(serviceDetails.type)}</span>
+                                            {serviceDetails.name}
                                           </h5>
                                           <motion.button
                                             onClick={() => setServiceDetails(null)}
-                                            className="text-gray-400 hover:text-white"
-                                            whileHover={{ scale: 1.1 }}
+                                            style={{
+                                              background: 'none',
+                                              border: 'none',
+                                              color: '#94a3b8',
+                                              fontSize: '1.25rem',
+                                              cursor: 'pointer',
+                                              padding: '0.25rem'
+                                            }}
+                                            whileHover={{ scale: 1.1, color: '#fff' }}
                                             whileTap={{ scale: 0.9 }}
                                           >
                                             ✕
                                           </motion.button>
                                         </div>
-                                        <div className="text-sm text-gray-300 grid gap-4">
+
+                                        <div style={{ display: 'grid', gap: '1rem' }}>
                                           <div>
-                                            <div className="font-medium text-orange-400 mb-1">📋 Description</div>
-                                            <div>{serviceDetails.description}</div>
+                                            <div style={{ fontWeight: 700, color: '#ff8c00', marginBottom: '0.5rem' }}>
+                                              📋 Description
+                                            </div>
+                                            <div style={{ color: '#e2e8f0', lineHeight: 1.5 }}>
+                                              {serviceDetails.description}
+                                            </div>
                                           </div>
+
                                           <div>
-                                            <div className="font-medium text-orange-400 mb-1">🏷️ Service Type</div>
+                                            <div style={{ fontWeight: 700, color: '#ff8c00', marginBottom: '0.5rem' }}>
+                                              🏷️ Service Type
+                                            </div>
                                             <span
-                                              className="inline-block px-3 py-1 rounded-full text-xs font-medium border"
                                               style={{
+                                                display: 'inline-block',
+                                                padding: '0.25rem 0.75rem',
+                                                borderRadius: '1rem',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 700,
                                                 background: `${serviceDetails.color}20`,
                                                 color: serviceDetails.color,
-                                                borderColor: serviceDetails.color
+                                                border: `1px solid ${serviceDetails.color}`
                                               }}
                                             >
                                               {serviceDetails.type.toUpperCase()}
                                             </span>
                                           </div>
+
                                           <div>
-                                            <div className="font-medium text-orange-400 mb-2">🔗 API Endpoints</div>
-                                            <div className="grid gap-1">
+                                            <div style={{ fontWeight: 700, color: '#ff8c00', marginBottom: '0.5rem' }}>
+                                              🔗 API Endpoints
+                                            </div>
+                                            <div style={{ display: 'grid', gap: '0.5rem' }}>
                                               {serviceDetails.endpoints.map((endpoint, idx) => (
-                                                <motion.span
+                                                <span
                                                   key={idx}
-                                                  className="inline-block bg-gray-600 px-3 py-1 rounded text-xs font-mono"
-                                                  initial={{ opacity: 0, x: -20 }}
-                                                  animate={{ opacity: 1, x: 0 }}
-                                                  transition={{ delay: idx * 0.1 }}
+                                                  style={{
+                                                    display: 'inline-block',
+                                                    background: 'rgba(71, 85, 105, 0.5)',
+                                                    padding: '0.5rem',
+                                                    borderRadius: '0.5rem',
+                                                    fontSize: '0.875rem',
+                                                    fontFamily: 'monospace',
+                                                    color: '#e2e8f0'
+                                                  }}
                                                 >
                                                   {endpoint}
-                                                </motion.span>
+                                                </span>
                                               ))}
                                             </div>
                                           </div>
+
                                           <div>
-                                            <div className="font-medium text-orange-400 mb-2">🛠️ Technologies</div>
-                                            <div className="flex flex-wrap gap-1">
+                                            <div style={{ fontWeight: 700, color: '#ff8c00', marginBottom: '0.5rem' }}>
+                                              🛠️ Technologies
+                                            </div>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                                               {serviceDetails.technologies.map((tech, idx) => (
-                                                <motion.span
+                                                <span
                                                   key={idx}
-                                                  className="inline-block bg-blue-600 px-2 py-1 rounded text-xs"
-                                                  initial={{ opacity: 0, scale: 0.8 }}
-                                                  animate={{ opacity: 1, scale: 1 }}
-                                                  transition={{ delay: idx * 0.1 }}
+                                                  style={{
+                                                    display: 'inline-block',
+                                                    background: '#3b82f6',
+                                                    padding: '0.25rem 0.5rem',
+                                                    borderRadius: '0.5rem',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 600,
+                                                    color: '#fff'
+                                                  }}
                                                 >
                                                   {tech}
-                                                </motion.span>
+                                                </span>
                                               ))}
                                             </div>
                                           </div>
@@ -974,36 +1477,46 @@ ${assets.microservices}
                                   </AnimatePresence>
 
                                   {/* Architecture Legend */}
-                                  <motion.div
-                                    className="mt-4 p-3 bg-gray-800 rounded-lg"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 1 }}
-                                  >
-                                    <h5 className="text-sm font-semibold text-gray-300 mb-2">🏗️ Architecture Legend</h5>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                                  <div className="glass-card-light" style={{ padding: '1rem' }}>
+                                    <h5 style={{
+                                      fontSize: '1rem',
+                                      fontWeight: 700,
+                                      color: '#e2e8f0',
+                                      marginBottom: '1rem',
+                                      textAlign: 'center'
+                                    }}>
+                                      🏗️ Architecture Legend
+                                    </h5>
+                                    <div className="grid-2" style={{ gap: '0.75rem' }}>
                                       {[
-                                        { color: '#3B82F6', label: 'API Gateway' },
-                                        { color: '#10B981', label: 'Core Services' },
-                                        { color: '#8B5CF6', label: 'Data Services' },
-                                        { color: '#F59E0B', label: 'External Services' }
+                                        { color: '#3B82F6', label: 'API Gateway', icon: '🚪' },
+                                        { color: '#10B981', label: 'Core Services', icon: '⚙️' },
+                                        { color: '#8B5CF6', label: 'Data Services', icon: '💾' },
+                                        { color: '#F59E0B', label: 'External Services', icon: '🌐' }
                                       ].map((item, idx) => (
-                                        <motion.div
+                                        <div
                                           key={idx}
-                                          className="flex items-center gap-2"
-                                          initial={{ opacity: 0, x: -20 }}
-                                          animate={{ opacity: 1, x: 0 }}
-                                          transition={{ delay: 1.2 + idx * 0.1 }}
+                                          style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.5rem',
+                                            fontSize: '0.875rem'
+                                          }}
                                         >
                                           <div
-                                            className="w-3 h-3 rounded-full"
-                                            style={{ backgroundColor: item.color }}
+                                            style={{
+                                              width: '12px',
+                                              height: '12px',
+                                              borderRadius: '50%',
+                                              backgroundColor: item.color
+                                            }}
                                           />
-                                          <span className="text-gray-300">{item.label}</span>
-                                        </motion.div>
+                                          <span>{item.icon}</span>
+                                          <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{item.label}</span>
+                                        </div>
                                       ))}
                                     </div>
-                                  </motion.div>
+                                  </div>
                                 </div>
                               </motion.div>
                             ) : (
@@ -1012,11 +1525,13 @@ ${assets.microservices}
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                className="backdrop-blur-md bg-gray-900/60 rounded-lg p-4 overflow-x-auto"
+                                transition={{ duration: 0.5 }}
                               >
-                                <pre className="text-sm text-gray-300 whitespace-pre-wrap">
-                                  <code>{results.modernizationAssets.microservices}</code>
-                                </pre>
+                                <div className="code-block" style={{ color: '#e2e8f0' }}>
+                                  <pre style={{ margin: 0 }}>
+                                    <code>{results.modernizationAssets.microservices}</code>
+                                  </pre>
+                                </div>
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -1026,28 +1541,51 @@ ${assets.microservices}
                   </AnimatePresence>
 
                   {/* Download Section */}
-                  <motion.div
-                    className="mt-8 text-center"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8 }}
-                  >
+                  <div className="center-container" style={{ marginTop: '3rem' }}>
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#fff', marginBottom: '0.5rem' }}>
+                        Ready to Transform?
+                      </h3>
+                      <p style={{ color: '#94a3b8', maxWidth: '500px' }}>
+                        Download your complete modernization package and begin your journey to the future
+                      </p>
+                    </div>
+
                     <motion.button
                       onClick={handleDownload}
-                      className="bg-transparent border-2 border-orange-500/60 text-gray-300 hover:bg-orange-500/10 hover:border-orange-500/80 px-8 py-3 rounded-lg font-medium transition-all duration-300"
+                      className="btn-primary"
+                      style={{
+                        padding: '1rem 2rem',
+                        borderRadius: '1rem',
+                        fontSize: '1.1rem',
+                        fontWeight: 700,
+                        background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                        color: '#fff'
+                      }}
                       whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      📥 Download All Assets
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        📥 Download All Assets 🚀
+                      </span>
                     </motion.button>
-                  </motion.div>
-                </motion.div>
-              </div>
-            </motion.section>
-          )}
-        </AnimatePresence>
+
+                    <p style={{
+                      marginTop: '1rem',
+                      color: '#64748b',
+                      fontSize: '0.875rem',
+                      textAlign: 'center'
+                    }}>
+                      Includes: Database Schema • REST API • JSON Data • Architecture Documentation
+                    </p>
+                  </div>
+                </div>
+              </motion.section>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
