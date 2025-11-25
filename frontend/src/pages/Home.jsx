@@ -106,7 +106,7 @@ const Home = () => {
             flexWrap: 'wrap',
             marginBottom: '2rem'
           }}>
-            <Link to="/register" style={{ textDecoration: 'none' }}>
+            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
               <button className="btn-primary" style={{
                 padding: '16px 32px',
                 fontSize: '1.2rem',

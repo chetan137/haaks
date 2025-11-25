@@ -323,8 +323,8 @@ This modernized system follows a microservices architecture pattern, breaking do
     }
   };
 
-  // Download functionality
-  const handleDownload = () => {
+  // Download Markdown functionality
+  const handleDownloadMarkdown = () => {
     if (!results) {
       setError('No results to download. Please run modernization first.');
       return;
@@ -370,12 +370,251 @@ ${assets.microservices}
     URL.revokeObjectURL(url);
   };
 
+  // Download PDF functionality
+  const handleDownloadPDF = () => {
+    if (!results) {
+      setError('No results to download. Please run modernization first.');
+      return;
+    }
+
+    const assets = results.modernizationAssets;
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+
+    // Create HTML content for PDF
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>AS/400 Legacy Modernization Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #ff8c00;
+        }
+        .header h1 {
+            color: #ff8c00;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        .section h2 {
+            color: #ff8c00;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #ffd700;
+        }
+        .code-block {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-left: 4px solid #ff8c00;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .insight-card {
+            background-color: #f8f9fa;
+            border: 2px solid #ff8c00;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .insight-card h3 {
+            color: #ff8c00;
+            margin-bottom: 10px;
+        }
+        .insight-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        .json-data {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AS/400 Legacy Modernization Results</h1>
+        <p><strong>Generated on:</strong> ${new Date().toLocaleString()}</p>
+        <p><strong>Source Files:</strong> ${results.files.copybook}, ${results.files.datafile}</p>
+    </div>
+
+    <div class="section">
+        <h2>🧠 Insight Engine Analysis</h2>
+        <div class="insight-grid">
+            <div class="insight-card">
+                <h3>Manual Effort</h3>
+                <div class="insight-value">${assets.insightEngine.manualEffort.hours} hours</div>
+                <p>${assets.insightEngine.manualEffort.timeline}</p>
+            </div>
+            <div class="insight-card">
+                <h3>Manual Cost (USD)</h3>
+                <div class="insight-value">${assets.insightEngine.manualEffort.costUSD}</div>
+            </div>
+            <div class="insight-card">
+                <h3>Tool Savings</h3>
+                <div class="insight-value">85%</div>
+                <p>Time & Cost Reduction</p>
+            </div>
+        </div>
+        <p><strong>Summary:</strong> ${assets.insightEngine.summary}</p>
+    </div>
+
+    <div class="section page-break">
+        <h2>🗄️ Database Schema</h2>
+        <div class="code-block">${assets.dbSchema}</div>
+    </div>
+
+    <div class="section page-break">
+        <h2>🔗 REST API Implementation</h2>
+        <div class="code-block">${assets.restApi}</div>
+    </div>
+
+    <div class="section page-break">
+        <h2>📊 Sample JSON Data</h2>
+        <div class="json-data">${JSON.stringify(assets.jsonData, null, 2)}</div>
+    </div>
+
+    <div class="section page-break">
+        <h2>🏗️ Microservices Architecture</h2>
+        <div class="code-block">${assets.microservices}</div>
+    </div>
+
+    <div class="footer">
+        <p>Generated by AS/400 Legacy Modernization Assistant</p>
+        <p>Timestamp: ${timestamp}</p>
+    </div>
+</body>
+</html>`;
+
+    // Create blob and download as HTML (which can be easily converted to PDF by browser)
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `modernization-results-${timestamp}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // Show instruction for PDF conversion
+    setTimeout(() => {
+      alert('HTML file downloaded! To convert to PDF:\n1. Open the downloaded HTML file in your browser\n2. Press Ctrl+P (or Cmd+P on Mac)\n3. Select "Save as PDF" as destination\n4. Click Save');
+    }, 500);
+  };
+
   const tabs = [
     { id: 'db-schema', name: '🗄️ Database Schema', icon: '🗄️' },
     { id: 'rest-api', name: '🔗 REST API', icon: '🔗' },
     { id: 'json-data', name: '📊 JSON Data', icon: '📊' },
     { id: 'microservices', name: '🏗️ Microservices', icon: '🏗️' }
   ];
+
+  // New: Load demo files for accounts
+  const loadAccountDemo = () => {
+    const accCpyContent = `******************************************************************
+      * ACCTREC.cpy - Account Record Layout
+      * Extracted from the COBOL Programming Course examples.
+      * This defines the structure for a customer account data file.
+      ******************************************************************
+       01  ACCT-FIELDS.
+           05  ACCT-NO            PIC X(8).
+           05  ACCT-LIMIT         PIC S9(7)V99 COMP-3.
+           05  ACCT-BALANCE       PIC S9(7)V99 COMP-3.
+           05  LAST-NAME          PIC X(20).
+           05  FIRST-NAME         PIC X(15).
+           05  CLIENT-ADDR.
+               10  STREET-ADDR    PIC X(25).
+               10  CITY-COUNTY    PIC X(20).
+               10  USA-STATE      PIC X(15).
+           05  RESERVED           PIC X(7).
+           05  COMMENTS           PIC X(50).`;
+    const accDatContent = `ACCT-NO	ACCT-LIMIT	ACCT-BALANCE	LAST-NAME	FIRST-NAME	STREET-ADDR	CITY-COUNTY	USA-STATE	COMMENTS
+A1002003	15000.00	7550.25	Stark	Anthony	10880 Malibu Point	Malibu	California	Primary account holder, high value client.
+B4005006	5000.00	1275.80	Rogers	Steven	569 Leaman Place	Brooklyn	New York	Founding member, excellent credit history.
+C7008009	500.00	234.51	Banner	Bruce	123 Gamma Labs Street	Dayton	Ohio	Account requires careful monitoring.
+D9011012	100000.00	9500.00	Romanoff	Natasha	25 Secret Avenue	Unknown	Unknown	Address on file is a placeholder.`;
+
+    const cpyBlob = new Blob([accCpyContent], { type: 'text/plain' });
+    const datBlob = new Blob([accDatContent], { type: 'text/plain' });
+
+    const cpyFile = new File([cpyBlob], "Acc.cpy");
+    const datFile = new File([datBlob], "Acc.dat");
+
+    setCopybookFile(cpyFile);
+    setDataFile(datFile);
+    setError('');
+  };
+
+  // New: Load demo files for claims
+  const loadClaimsDemo = () => {
+    const claimsCpyContent = `******************************************************************
+      * CLAIMS.cpy - Healthcare Claim Transaction Layout
+      ******************************************************************
+       01  CLAIM-RECORD.
+           05  CLAIM-ID           PIC X(15).
+           05  PATIENT-ID         PIC 9(10).
+           05  PROVIDER-ID        PIC X(12).
+           05  SERVICE-DATE       PIC 9(8).
+           05  DIAGNOSIS-CODE     PIC X(10).
+           05  PROCEDURE-CODE     PIC X(10).
+           05  AMOUNT-BILLED      PIC S9(7)V99.
+           05  AMOUNT-PAID        PIC S9(7)V99.
+           05  STATUS-CODE        PIC X(1).`;
+    const claimsDatContent = `CLM-2025-0000010000123456PROV-XYZ-12320250920ICD-J45.90CPT-99214000055000000047550P
+CLM-2025-0000020000456789PROV-ABC-45620250921ICD-M54.5 CPT-97140000030000000025000A
+CLM-2025-0000030000987654PROV-XYZ-12320250921ICD-R05   CPT-99203000015000000012500P
+CLM-2025-0000040000123456PROV-DEF-78920250922ICD-J02.9 CPT-87880000007500000006500D`;
+
+    const cpyBlob = new Blob([claimsCpyContent], { type: 'text/plain' });
+    const datBlob = new Blob([claimsDatContent], { type: 'text/plain' });
+
+    const cpyFile = new File([cpyBlob], "CLAIMS.CPY");
+    const datFile = new File([datBlob], "CLAIMS.DAT");
+
+    setCopybookFile(cpyFile);
+    setDataFile(datFile);
+    setError('');
+  };
 
   return (
     <>
@@ -466,6 +705,20 @@ ${assets.microservices}
           background: rgba(255, 140, 0, 0.1);
           border-color: rgba(255, 140, 0, 0.6);
           color: #fff;
+        }
+
+        .btn-pdf {
+          background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+          color: #fff;
+          border: none;
+          font-weight: 700;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-pdf:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 30px rgba(220, 38, 38, 0.4);
         }
 
         .tab-active {
@@ -568,6 +821,13 @@ ${assets.microservices}
           width: 100%;
         }
 
+        .download-buttons {
+          display: flex;
+          gap: 1rem;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
         @media (max-width: 768px) {
           .content-wrapper {
             padding: 0 0.5rem;
@@ -581,6 +841,11 @@ ${assets.microservices}
 
           .section-spacing {
             margin-bottom: 2rem;
+          }
+
+          .download-buttons {
+            flex-direction: column;
+            align-items: center;
           }
         }
       `}</style>
@@ -664,6 +929,206 @@ ${assets.microservices}
               Transform your COBOL legacy systems into modern web applications with AI-powered analysis
             </motion.p>
           </motion.header>
+
+          {/* New: Problem Context Section */}
+          <motion.section
+            className="section-spacing"
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="glass-card" style={{ padding: '3rem' }}>
+              <div className="center-container" style={{ marginBottom: '3rem' }}>
+                <motion.h2
+                  className="gradient-text"
+                  variants={scaleIn}
+                  style={{
+                    fontSize: 'clamp(2rem, 5vw, 3rem)',
+                    fontWeight: 800,
+                    marginBottom: '1rem'
+                  }}
+                >
+                  AI-Powered Legacy Modernization Assistant
+                </motion.h2>
+                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '2rem' }}>
+                  Many enterprises still rely on IBM AS/400 (iSeries) systems for critical operations. While these platforms are stable and reliable, they pose serious challenges today:
+                </p>
+                <ul style={{ color: '#94a3b8', fontSize: '1rem', lineHeight: '1.8', maxWidth: '800px' }}>
+                  <li>Outdated green-screen interfaces that are difficult to use.</li>
+                  <li>Flat files and DB2 databases that are tightly coupled, making integration painful.</li>
+                  <li>Locked-in data and business logic buried in legacy workflows.</li>
+                  <li>High cost and risk associated with migration or modernization.</li>
+                </ul>
+                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginTop: '2rem' }}>
+                  These challenges prevent organizations from adopting modern platforms, APIs, and cloud-native architectures. This AI agent solves this by automating the modernization of AS/400 workloads into a modern ecosystem, converting legacy COBOL copybooks and data files into SQL schemas, REST APIs, JSON data, and microservices architectures.
+                </p>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* New: System Diagram Section */}
+          <motion.section
+            className="section-spacing"
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <div className="glass-card" style={{ padding: '3rem' }}>
+              <div className="center-container" style={{ marginBottom: '3rem' }}>
+                <motion.h2
+                  className="gradient-text"
+                  variants={scaleIn}
+                  style={{
+                    fontSize: 'clamp(2rem, 5vw, 3rem)',
+                    fontWeight: 800,
+                    marginBottom: '1rem'
+                  }}
+                >
+                  System Flow Diagram
+                </motion.h2>
+                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '2rem' }}>
+                  The following diagram illustrates the multi-agent pipeline process: Starting from user registration/login, it converts SQL & APIs, extracts schema & fields, preprocesses, chunks, orchestrates parsing, transformation, validation, and repair if invalid, finally checking correctness & confidence via an explainer agent and API layer.
+                </p>
+                <div className="code-block" style={{ whiteSpace: 'pre', fontFamily: 'monospace', textAlign: 'left' }}>
+{`                  Phone/Email +
+                  Registration       Login
+User  ------------> ------------>
+Start    Enter Basic Info,       Multi-Agent
+         Email, Password (1)      Pipeline
+                                 User Upload
+Converts SQL &                   /dat /cpy
+APIs                             Labeled File
+Extracts
+Schema & Fields
+
+Preproessing
+Chunking
+Orchestrator
+Parser   Transform   Validator   DB Schema
+Repair                   R
+If Invalid
+Repair Agent
+Explainer Agent         Checks &
+                        Correctness
+                        Confidence
+                        API Layer
+Outputs Invalid`}
+                </div>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* New: Demo Files Section */}
+          <motion.section
+            className="section-spacing"
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <div className="glass-card" style={{ padding: '3rem' }}>
+              <div className="center-container" style={{ marginBottom: '3rem' }}>
+                <motion.h2
+                  className="gradient-text"
+                  variants={scaleIn}
+                  style={{
+                    fontSize: 'clamp(2rem, 5vw, 3rem)',
+                    fontWeight: 800,
+                    marginBottom: '1rem'
+                  }}
+                >
+                  Try Demo Files
+                </motion.h2>
+                <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '2rem' }}>
+                  Use these pre-loaded demo files to easily test the modernization process and analyze the output without uploading your own files.
+                </p>
+              </div>
+              <div className="grid-2">
+                <motion.div
+                  className="glass-card-light"
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  style={{ padding: '2rem' }}
+                >
+                  <div className="center-container">
+                    <h3 style={{
+                      fontSize: '1.5rem',
+                      fontWeight: 700,
+                      color: '#fff',
+                      marginBottom: '0.5rem'
+                    }}>
+                      Account Demo
+                    </h3>
+                    <p style={{
+                      color: '#94a3b8',
+                      marginBottom: '2rem',
+                      lineHeight: 1.5
+                    }}>
+                      Loads Acc.cpy (copybook) and Acc.dat (data) for customer accounts.
+                    </p>
+                    <motion.button
+                      onClick={loadAccountDemo}
+                      className="btn-primary"
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '0.75rem',
+                        fontSize: '1rem',
+                        width: '100%',
+                        maxWidth: '250px'
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Load Account Demo
+                    </motion.button>
+                  </div>
+                </motion.div>
+                <motion.div
+                  className="glass-card-light"
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  style={{ padding: '2rem' }}
+                >
+                  <div className="center-container">
+                    <h3 style={{
+                      fontSize: '1.5rem',
+                      fontWeight: 700,
+                      color: '#fff',
+                      marginBottom: '0.5rem'
+                    }}>
+                      Claims Demo
+                    </h3>
+                    <p style={{
+                      color: '#94a3b8',
+                      marginBottom: '2rem',
+                      lineHeight: 1.5
+                    }}>
+                      Loads CLAIMS.CPY (copybook) and CLAIMS.DAT (data) for healthcare claims.
+                    </p>
+                    <motion.button
+                      onClick={loadClaimsDemo}
+                      className="btn-primary"
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '0.75rem',
+                        fontSize: '1rem',
+                        width: '100%',
+                        maxWidth: '250px'
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Load Claims Demo
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </motion.section>
 
           {/* Upload Section */}
           <motion.section
@@ -1551,24 +2016,43 @@ ${assets.microservices}
                       </p>
                     </div>
 
-                    <motion.button
-                      onClick={handleDownload}
-                      className="btn-primary"
-                      style={{
-                        padding: '1rem 2rem',
-                        borderRadius: '1rem',
-                        fontSize: '1.1rem',
-                        fontWeight: 700,
-                        background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-                        color: '#fff'
-                      }}
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        📥 Download All Assets 🚀
-                      </span>
-                    </motion.button>
+                    <div className="download-buttons">
+                      <motion.button
+                        onClick={handleDownloadMarkdown}
+                        className="btn-primary"
+                        style={{
+                          padding: '1rem 2rem',
+                          borderRadius: '1rem',
+                          fontSize: '1.1rem',
+                          fontWeight: 700,
+                          background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                          color: '#fff'
+                        }}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          📝 Download Markdown
+                        </span>
+                      </motion.button>
+
+                      <motion.button
+                        onClick={handleDownloadPDF}
+                        className="btn-pdf"
+                        style={{
+                          padding: '1rem 2rem',
+                          borderRadius: '1rem',
+                          fontSize: '1.1rem',
+                          fontWeight: 700
+                        }}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          📄 Download PDF Format
+                        </span>
+                      </motion.button>
+                    </div>
 
                     <p style={{
                       marginTop: '1rem',

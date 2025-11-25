@@ -1,8 +1,8 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const AIClient = require('../../engine/aiClient');
 const { MongoClient } = require('mongodb');
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Initialize AI Client
+const aiClient = new AIClient();
 
 // MongoDB connection
 let mongoClient = null;
@@ -99,7 +99,6 @@ function parseCopybook(copybookContent) {
         throw new Error('Failed to parse COBOL copybook: ' + error.message);
     }
 }
-
 /**
  * Call Gemini AI API for legacy modernization
  * @param {Object} parsedSchema - Parsed COBOL schema
@@ -108,8 +107,6 @@ function parseCopybook(copybookContent) {
  */
 async function callGeminiAPI(parsedSchema, datafileContent) {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
         const prompt = `You are an expert AS/400 modernization architect. Your task is to convert a legacy COBOL file definition and its data into a complete set of modern assets.
 
 Here is the parsed COBOL copybook schema:
@@ -122,45 +119,79 @@ Based on this, generate a single, valid JSON object as your response. Do not inc
 
 1. **dbSchema**: Generate a single CREATE TABLE SQL statement for a modern PostgreSQL database that accurately represents the copybook schema. Use appropriate modern data types (e.g., VARCHAR, INTEGER, DECIMAL, TEXT).
 
-2. **restApi**: Generate the complete code for a simple Node.js Express REST API. This API should have a GET all endpoint (/api/accounts) and a GET by ID endpoint (/api/accounts/:id). The code should be fully functional.
+2. **restApi**: Generate the complete code for a simple Node.js Express REST API. This API should have a GET all endpoint (/api/accounts) and a GET by ID endpoint (/api/accounts/:id). The code should be fully functional. Keep the code concise.
 
-3. **jsonData**: Convert the provided raw data file content into a clean, human-readable JSON array of objects.
+3. **jsonData**: Convert the provided raw data file content into a clean, human-readable JSON array of objects. Limit to first 5 records only.
 
 4. **microservices**: Suggest two potential microservices that could be built from this data, including a one-line description for each.
 
 5. **microserviceDiagram**: Based on the two microservices you suggested, generate a simple component diagram using Mermaid.js graph TD syntax. The diagram should show a 'User' interacting with a 'Load Balancer', which then directs traffic to the two suggested microservices.
 
-Ensure your response is valid JSON that can be parsed directly.`;
+IMPORTANT: Keep your response concise. Ensure your response is valid JSON that can be parsed directly. Do not truncate the JSON - make sure all strings are properly closed.`;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+        console.log('Calling AI Client for modernization...');
+        const text = await aiClient.generateContent(prompt, {
+            temperature: 0.2,
+            maxOutputTokens: 8192,
+            systemPrompt: 'You are an expert AS/400 modernization architect. Always return complete, valid JSON.'
+        });
+
+        console.log('AI Response received, length:', text.length);
 
         // Clean the response and parse JSON
         let cleanedText = text.trim();
 
-        // Remove any markdown code block markers if present
-        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-        cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        // Remove markdown code blocks
+        cleanedText = cleanedText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '');
+        cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/i, '');
+
+        // Remove any leading/trailing whitespace
+        cleanedText = cleanedText.trim();
+
+        console.log('Cleaned response length:', cleanedText.length);
+        console.log('First 200 chars:', cleanedText.substring(0, 200));
+        console.log('Last 200 chars:', cleanedText.substring(cleanedText.length - 200));
 
         try {
-            return JSON.parse(cleanedText);
+            const parsed = JSON.parse(cleanedText);
+            console.log('Successfully parsed JSON response');
+            return parsed;
         } catch (parseError) {
-            console.error('JSON Parse Error:', parseError);
-            console.error('Raw Response:', text);
+            console.error('JSON Parse Error:', parseError.message);
+            console.error('Error at position:', parseError.message.match(/position (\d+)/)?.[1]);
+            console.error('Full raw response:', text);
 
-            // Fallback: try to extract JSON from the response
+            // Try to find and extract valid JSON object
             const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
-                return JSON.parse(jsonMatch[0]);
+                try {
+                    console.log('Attempting to parse extracted JSON...');
+                    const extracted = jsonMatch[0];
+
+                    // Check if the JSON is truncated (common issue)
+                    if (!extracted.endsWith('}')) {
+                        console.error('JSON appears to be truncated');
+                        throw new Error('Response was truncated - incomplete JSON received');
+                    }
+
+                    const parsed = JSON.parse(extracted);
+                    console.log('Successfully parsed extracted JSON');
+                    return parsed;
+                } catch (extractError) {
+                    console.error('Failed to parse extracted JSON:', extractError.message);
+                }
             }
 
-            throw new Error('Invalid JSON response from AI');
+            // If all parsing attempts fail, throw detailed error
+            throw new Error(`Invalid JSON response from AI: ${parseError.message}. Response length: ${text.length} chars. Check logs for full response.`);
         }
 
     } catch (error) {
-        console.error('Gemini API Error:', error);
-        throw new Error('Failed to process with Gemini AI: ' + error.message);
+        console.error('=== AI Client Error ===');
+        console.error('Error type:', error.constructor.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        throw new Error('Failed to process with AI Client: ' + error.message);
     }
 }
 
@@ -172,8 +203,6 @@ Ensure your response is valid JSON that can be parsed directly.`;
  */
 async function getInsightEngineAnalysis(parsedSchema) {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
         const prompt = `You are an expert AI-powered IT project management consultant specializing in legacy system modernization. Your task is to analyze the provided COBOL copybook schema and generate a concise Return on Investment (ROI) analysis, which will be branded as "The Insight Engine".
 
 Here is the parsed COBOL schema:
@@ -189,14 +218,14 @@ Your response MUST be a single, valid JSON object and nothing else. The JSON obj
 
 Provide realistic estimates based on the complexity of the schema. Consider factors like number of fields, data types, and typical enterprise development rates. The summary should be a concise 2-3 sentence explanation of the ROI benefits.`;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+        console.log('Calling AI Client for Insight Engine analysis...');
+        const text = await aiClient.generateContent(prompt, {
+            temperature: 0.2,
+            systemPrompt: 'You are an expert IT consultant.'
+        });
 
         // Clean the response and parse JSON
         let cleanedText = text.trim();
-
-        // Remove any markdown code block markers if present
         cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
         cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
 
@@ -204,7 +233,6 @@ Provide realistic estimates based on the complexity of the schema. Consider fact
             return JSON.parse(cleanedText);
         } catch (parseError) {
             console.error('JSON Parse Error in Insight Engine:', parseError);
-            console.error('Raw Response:', text);
 
             // Fallback: try to extract JSON from the response
             const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
@@ -212,20 +240,7 @@ Provide realistic estimates based on the complexity of the schema. Consider fact
                 return JSON.parse(jsonMatch[0]);
             }
 
-            // Fallback response if parsing fails
-            return {
-                analysisTitle: "The Insight Engine",
-                manualEffort: {
-                    hours: "480-720",
-                    timeline: "3-4 months",
-                    costUSD: "$48,000-$72,000"
-                },
-                automatedTool: {
-                    time: "2-3 weeks",
-                    costUSD: "$5,000-$8,000"
-                },
-                summary: "Automated modernization tools can reduce development time by 85% and costs by 80% compared to manual migration approaches."
-            };
+            throw new Error('Invalid JSON response');
         }
 
     } catch (error) {
@@ -249,17 +264,35 @@ Provide realistic estimates based on the complexity of the schema. Consider fact
 }
 
 /**
- * Main controller function to handle legacy file modernization
+ * Modernize Legacy Files - Main controller function
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 async function modernizeLegacyFiles(req, res) {
     try {
-        // Validate file uploads
+        console.log('=== Modernization Request Started ===');
+        console.log('Files received:', req.files);
+        console.log('User:', req.user);
+
+        // Validate that files were uploaded
         if (!req.files || !req.files.copybook || !req.files.datafile) {
+            console.error('Missing files. Received:', req.files);
             return res.status(400).json({
                 success: false,
-                error: 'Both copybook (.cpy) and datafile (.dat) are required'
+                error: 'Both copybook (.cpy) and datafile (.dat) are required',
+                received: {
+                    hasCopybook: !!(req.files && req.files.copybook),
+                    hasDatafile: !!(req.files && req.files.datafile),
+                    filesReceived: req.files ? Object.keys(req.files) : []
+                }
+            });
+        }
+
+        if (!req.files.copybook[0] || !req.files.datafile[0]) {
+            console.error('Empty file arrays');
+            return res.status(400).json({
+                success: false,
+                error: 'Both copybook and datafile must be provided'
             });
         }
 
@@ -340,35 +373,26 @@ async function modernizeLegacyFiles(req, res) {
         };
 
         // Step 6: Optionally save to user's profile in MongoDB
-        // You can implement this based on your User model structure
         try {
             // Example: Add to user's modernization history
-            // await User.findByIdAndUpdate(req.user._id, {
-            //     $push: {
-            //         modernizationHistory: {
-            //             timestamp: new Date(),
-            //             copybookName: copybookFile.originalname,
-            //             datafileName: dataFile.originalname,
-            //             parsedSchema: parsedSchema,
-            //             result: modernizationResult
-            //         }
-            //     }
-            // });
         } catch (dbError) {
             console.error('Database save error:', dbError);
-            // Don't fail the request if DB save fails
         }
 
         // Step 7: Send the response
         res.status(200).json(response);
 
     } catch (error) {
-        console.error('Modernization error:', error);
+        console.error('=== Modernization Error ===');
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('Error details:', error);
 
         res.status(500).json({
             success: false,
             error: error.message || 'An error occurred during modernization',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 }
@@ -390,14 +414,11 @@ async function queryData(req, res) {
             });
         }
 
-        console.log(`Processing data query for user: ${req.user.email}`);
-        console.log(`Question: ${question}`);
-
         // Initialize database connection
         const database = await initializeDatabase();
 
         // Call Gemini AI to convert question to MongoDB query
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        let mongoQueryObject;
 
         const prompt = `You are an expert AI data analyst that specializes in converting natural language questions into valid MongoDB find queries.
 
@@ -414,16 +435,17 @@ Example: If the question is "list all customers from New York", your output shou
 Example: If the question is "find the customer with the last name Stark", your output should be:
 { "mongoQuery": { "LAST_NAME": "Stark" } }`;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+        console.log('Calling AI Client for data query...');
+        const text = await aiClient.generateContent(prompt, {
+            temperature: 0.1,
+            systemPrompt: 'You are an expert AI data analyst.'
+        });
 
         // Clean and parse the AI response
         let cleanedText = text.trim();
         cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
         cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
 
-        let mongoQueryObject;
         try {
             const aiResponse = JSON.parse(cleanedText);
             mongoQueryObject = aiResponse.mongoQuery;
@@ -492,7 +514,7 @@ async function refineGeneratedCode(req, res) {
         console.log(`Code length: ${code.length} characters`);
 
         // Call Gemini AI to refine the code
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        let refinedCode;
 
         const prompt = `You are an expert AI Code Refinement Assistant. Your task is to take a block of existing code and modify it based on a user's instruction. You must only return the complete, new block of code and nothing else. Do not add any explanations or markdown formatting.
 
@@ -506,9 +528,13 @@ Here is the user's instruction:
 
 Now, generate and return the complete, fully updated code block that incorporates the user's change.`;
 
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const refinedCode = response.text().trim();
+        console.log('Calling AI Client for code refinement...');
+        const text = await aiClient.generateContent(prompt, {
+            temperature: 0.1,
+            systemPrompt: 'You are an expert AI Code Refinement Assistant.'
+        });
+
+        refinedCode = text.trim();
 
         // Clean up any markdown formatting if present
         let cleanedCode = refinedCode;

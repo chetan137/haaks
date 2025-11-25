@@ -29,13 +29,19 @@ router.post(
  */
 router.post(
     '/modernize-demo',
-    upload.fields([
-        { name: 'copybook', maxCount: 1 },
-        { name: 'datafile', maxCount: 1 }
-    ]),
+    upload.any(), // Accept any file fields
     (req, res, next) => {
         // Add a mock user for demo purposes
         req.user = { email: 'demo@example.com', _id: 'demo-user' };
+
+        // Reorganize files into expected structure
+        if (req.files && Array.isArray(req.files)) {
+            req.files = {
+                copybook: req.files.filter(f => f.originalname.toLowerCase().endsWith('.cpy')),
+                datafile: req.files.filter(f => f.originalname.toLowerCase().endsWith('.dat'))
+            };
+        }
+
         modernizeLegacyFiles(req, res, next);
     }
 );

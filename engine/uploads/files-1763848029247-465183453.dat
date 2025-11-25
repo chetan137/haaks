@@ -1,0 +1,5 @@
+ACCT-NO	ACCT-LIMIT	ACCT-BALANCE	LAST-NAME	FIRST-NAME	STREET-ADDR	CITY-COUNTY	USA-STATE	COMMENTS
+A1002003	15000.00	7550.25	Stark	Anthony	10880 Malibu Point	Malibu	California	Primary account holder, high value client.
+B4005006	5000.00	1275.80	Rogers	Steven	569 Leaman Place	Brooklyn	New York	Founding member, excellent credit history.
+C7008009	500.00	234.51	Banner	Bruce	123 Gamma Labs Street	Dayton	Ohio	Account requires careful monitoring.
+D9011012	100000.00	9500.00	Romanoff	Natasha	25 Secret Avenue	Unknown	Unknown	Address on file is a placeholder.
